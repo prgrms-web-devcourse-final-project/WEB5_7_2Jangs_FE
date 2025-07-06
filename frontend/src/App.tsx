@@ -1,11 +1,11 @@
-import "./App.css"
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
 
-function App() {
-  return (
-    <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-    </>
-  )
-}
+import "./index.css"
+import { Router } from "./routes/Router"
 
-export default App
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <Router />
+  </StrictMode>,
+)
