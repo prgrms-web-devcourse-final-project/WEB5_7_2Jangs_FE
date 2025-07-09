@@ -39,7 +39,11 @@ const signupSchema = z
 
 type SignupFormData = z.infer<typeof signupSchema>
 
-export default function SignupForm() {
+export default function SignupForm({
+  onSuccess,
+}: {
+  onSuccess: () => void
+}) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isCodeSent, setIsCodeSent] = useState(false)
@@ -65,6 +69,7 @@ export default function SignupForm() {
       console.log("회원가입 데이터:", data)
       await new Promise((resolve) => setTimeout(resolve, 2000)) // 시뮬레이션
       alert("회원가입이 완료되었습니다!")
+      onSuccess()
     } catch (error) {
       console.error("회원가입 실패:", error)
     } finally {
