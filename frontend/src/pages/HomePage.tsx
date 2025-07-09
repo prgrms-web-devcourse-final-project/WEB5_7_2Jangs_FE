@@ -31,7 +31,7 @@ export default function HomePage() {
           <div className="pt-4">
             <Button
               onClick={handleGetStarted}
-              className="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 text-lg rounded-lg font-medium transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-8 text-lg rounded-lg font-medium transition-colors"
               size="lg"
             >
               Let's Get Started
