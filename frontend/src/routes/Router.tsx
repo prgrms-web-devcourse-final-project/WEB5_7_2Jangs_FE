@@ -6,6 +6,7 @@ import LoginPage from "@/pages/LoginPage"
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage"
 import DocumentsPage from "@/pages/DocumentsPage"
 import DocumentDetailPage from "@/pages/DocumentDetailPage"
+import MergePage from "@/pages/MergePage"
 
 export const Router = () => {
   return (
@@ -18,6 +19,7 @@ export const Router = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/documents/:id" element={<DocumentDetailPage />} />
+          <Route path="/merge" element={<MergePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

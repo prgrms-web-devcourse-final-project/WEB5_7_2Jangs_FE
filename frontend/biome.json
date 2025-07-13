@@ -18,7 +18,8 @@
         "noSvgWithoutTitle": "off"
       },
       "suspicious": {
-        "noArrayIndexKey": "off"
+        "noArrayIndexKey": "off",
+        "noExplicitAny": "off"
       },
       "complexity": {
         "noBannedTypes": "off"

@@ -78,6 +78,16 @@ export default function DocumentDetailPage() {
       case "continueEdit":
         navigate(`/documents/${documentId}?mode=edit&commitId=${commitId}`)
         break
+      case "merge": {
+        // 현재 커밋과 선택된 커밋을 병합
+        if (!commitId || !newCommitId || commitId === newCommitId.toString()) {
+          return
+        }
+        navigate(
+          `/merge?documentId=${documentId}&baseCommitId=${commitId}&targetCommitId=${newCommitId}`,
+        )
+        break
+      }
       case "delete":
         // 삭제처리
         break
