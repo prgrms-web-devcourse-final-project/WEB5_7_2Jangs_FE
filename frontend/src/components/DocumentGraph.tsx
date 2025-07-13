@@ -50,6 +50,11 @@ interface GraphDataType {
 
 interface DocumentGraphProps {
   data: GraphDataType
+  currentCommitId: string | null
+  onNodeMenuClick: (
+    type: "view" | "compare" | "continueEdit" | "delete",
+    commitId: number,
+  ) => void
 }
 
 // 브랜치 이름을 기반으로 해시 생성
@@ -95,7 +100,11 @@ function getBranchColor(branchName: string): string {
   return colorPalette[colorIndex]
 }
 
-export default function DocumentGraph({ data }: DocumentGraphProps) {
+export default function DocumentGraph({
+  data,
+  currentCommitId,
+  onNodeMenuClick,
+}: DocumentGraphProps) {
   // 현재 열린 드롭다운 ID를 관리
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
 
@@ -133,6 +142,9 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
       // 브랜치의 마지막 커밋인지 확인
       const isLastCommit = branch?.leafCommitId === commit.id
 
+      // 현재 커밋인지 확인
+      const isCurrentCommit = currentCommitId === commit.id.toString()
+
       return {
         id: commit.id.toString(),
         position: { x: xPosition, y: yPosition },
@@ -146,7 +158,9 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
             >
               <DropdownMenuTrigger asChild>
                 <div
-                  className="p-3 min-w-[180px] cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                  className={`p-3 min-w-[180px] cursor-pointer hover:bg-gray-50 rounded-lg transition-colors ${
+                    isCurrentCommit ? "bg-yellow-50 hover:bg-yellow-100" : ""
+                  }`}
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -173,7 +187,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log("문서보기:", commit)
+                    onNodeMenuClick("view", commit.id)
+                    setOpenDropdownId(null)
                   }}
                   className="cursor-pointer"
                 >
@@ -183,7 +198,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log("비교하기:", commit)
+                    onNodeMenuClick("compare", commit.id)
+                    setOpenDropdownId(null)
                   }}
                   className="cursor-pointer"
                 >
@@ -193,7 +209,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log("이어서 작업하기:", commit)
+                    onNodeMenuClick("continueEdit", commit.id)
+                    setOpenDropdownId(null)
                   }}
                   className="cursor-pointer"
                 >
@@ -204,7 +221,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation()
-                      console.log("삭제하기:", commit)
+                      onNodeMenuClick("delete", commit.id)
+                      setOpenDropdownId(null)
                     }}
                     className="cursor-pointer text-red-600 focus:text-red-600"
                   >
@@ -217,8 +235,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
           ),
         },
         style: {
-          backgroundColor: "white",
-          border: `2px solid ${color}`,
+          backgroundColor: isCurrentCommit ? "#fefce8" : "white",
+          border: `2px solid ${isCurrentCommit ? "#eab308" : color}`,
           borderRadius: "8px",
           width: "auto",
           fontSize: "12px",
@@ -227,7 +245,7 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
         targetPosition: Position.Top,
       }
     })
-  }, [data, openDropdownId])
+  }, [data, openDropdownId, onNodeMenuClick, currentCommitId])
 
   // 엣지를 React Flow 엣지로 변환
   const edges = useMemo<Edge[]>(() => {

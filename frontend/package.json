@@ -30,6 +30,7 @@
     "@xyflow/react": "^12.8.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "diff-match-patch": "^1.0.5",
     "lucide-react": "^0.525.0",
     "path": "^0.12.7",
     "react": "^19.0.0",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@types/diff-match-patch": "^1.0.36",
     "@types/node": "^24.0.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
