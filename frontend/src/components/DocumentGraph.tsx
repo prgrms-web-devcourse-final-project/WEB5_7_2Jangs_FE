@@ -190,8 +190,8 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
   }, [data, nodes])
 
   return (
-    <div className="w-full h-full">
-      <div className="mb-4">
+    <div className="relative w-full h-full">
+      <div className="absolute top-5 left-5">
         <h2 className="text-2xl font-bold">{data.title}</h2>
       </div>
       <div className="w-full h-full border border-gray-200 rounded-lg">

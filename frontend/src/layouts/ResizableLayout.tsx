@@ -72,7 +72,7 @@ export default function ResizableLayout({
   const [sidebarContent, mainContent] = children
 
   return (
-    <div className={`flex h-screen bg-gray-50 ${className}`}>
+    <div className={`flex h-full bg-gray-50 ${className}`}>
       {/* 사이드 패널 */}
       <div
         ref={sidebarRef}

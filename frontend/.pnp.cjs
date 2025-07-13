@@ -29,7 +29,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@biomejs/biome", "npm:1.9.4"],\
+          ["@editorjs/code", "npm:2.9.3"],\
+          ["@editorjs/delimiter", "npm:1.4.2"],\
           ["@editorjs/editorjs", "npm:2.30.8"],\
+          ["@editorjs/header", "npm:2.8.8"],\
+          ["@editorjs/image", "npm:2.10.3"],\
+          ["@editorjs/list", "npm:2.0.8"],\
+          ["@editorjs/paragraph", "npm:2.11.7"],\
+          ["@editorjs/quote", "npm:2.7.6"],\
           ["@hookform/resolvers", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:5.1.1"],\
           ["@radix-ui/react-avatar", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:1.1.10"],\
           ["@radix-ui/react-dialog", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:1.1.14"],\
@@ -154,11 +161,125 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@codexteam/icons", [\
+      ["npm:0.0.4", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@codexteam-icons-npm-0.0.4-7e26576f5a-10c0.zip/node_modules/@codexteam/icons/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.0.4"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:0.0.5", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@codexteam-icons-npm-0.0.5-6e551884d3-10c0.zip/node_modules/@codexteam/icons/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.0.5"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:0.3.3", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@codexteam-icons-npm-0.3.3-c6c9863dcc-10c0.zip/node_modules/@codexteam/icons/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/code", [\
+      ["npm:2.9.3", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-code-npm-2.9.3-8636abd0bd-10c0.zip/node_modules/@editorjs/code/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"],\
+          ["@editorjs/code", "npm:2.9.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/delimiter", [\
+      ["npm:1.4.2", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-delimiter-npm-1.4.2-216e57c526-10c0.zip/node_modules/@editorjs/delimiter/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"],\
+          ["@editorjs/delimiter", "npm:1.4.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/dom", [\
+      ["npm:0.0.5", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-dom-npm-0.0.5-ea179294da-10c0.zip/node_modules/@editorjs/dom/",\
+        "packageDependencies": [\
+          ["@editorjs/dom", "npm:0.0.5"],\
+          ["@editorjs/helpers", "npm:0.0.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@editorjs/editorjs", [\
       ["npm:2.30.8", {\
         "packageLocation": "../../../../.yarn/berry/cache/@editorjs-editorjs-npm-2.30.8-0e1012689e-10c0.zip/node_modules/@editorjs/editorjs/",\
         "packageDependencies": [\
           ["@editorjs/editorjs", "npm:2.30.8"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/header", [\
+      ["npm:2.8.8", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-header-npm-2.8.8-9fb6185f8b-10c0.zip/node_modules/@editorjs/header/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.0.5"],\
+          ["@editorjs/editorjs", "npm:2.30.8"],\
+          ["@editorjs/header", "npm:2.8.8"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/helpers", [\
+      ["npm:0.0.4", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-helpers-npm-0.0.4-cab8feb6a0-10c0.zip/node_modules/@editorjs/helpers/",\
+        "packageDependencies": [\
+          ["@editorjs/helpers", "npm:0.0.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/image", [\
+      ["npm:2.10.3", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-image-npm-2.10.3-3255640481-10c0.zip/node_modules/@editorjs/image/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"],\
+          ["@editorjs/image", "npm:2.10.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/list", [\
+      ["npm:2.0.8", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-list-npm-2.0.8-8582ed0973-10c0.zip/node_modules/@editorjs/list/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"],\
+          ["@editorjs/list", "npm:2.0.8"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/paragraph", [\
+      ["npm:2.11.7", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-paragraph-npm-2.11.7-019e6ef7e1-10c0.zip/node_modules/@editorjs/paragraph/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.0.4"],\
+          ["@editorjs/paragraph", "npm:2.11.7"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@editorjs/quote", [\
+      ["npm:2.7.6", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@editorjs-quote-npm-2.7.6-52bb6f85c8-10c0.zip/node_modules/@editorjs/quote/",\
+        "packageDependencies": [\
+          ["@codexteam/icons", "npm:0.3.3"],\
+          ["@editorjs/dom", "npm:0.0.5"],\
+          ["@editorjs/quote", "npm:2.7.6"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -3022,7 +3143,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@biomejs/biome", "npm:1.9.4"],\
+          ["@editorjs/code", "npm:2.9.3"],\
+          ["@editorjs/delimiter", "npm:1.4.2"],\
           ["@editorjs/editorjs", "npm:2.30.8"],\
+          ["@editorjs/header", "npm:2.8.8"],\
+          ["@editorjs/image", "npm:2.10.3"],\
+          ["@editorjs/list", "npm:2.0.8"],\
+          ["@editorjs/paragraph", "npm:2.11.7"],\
+          ["@editorjs/quote", "npm:2.7.6"],\
           ["@hookform/resolvers", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:5.1.1"],\
           ["@radix-ui/react-avatar", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:1.1.10"],\
           ["@radix-ui/react-dialog", "virtual:d9650954c7f1725ea712d2e40695de9ea5d1c0fa9b89379134c62909d440d91b03d6c37e2823804a3404472b90a5bec73c82193190dd3c4db4c9e9edd75db91e#npm:1.1.14"],\
