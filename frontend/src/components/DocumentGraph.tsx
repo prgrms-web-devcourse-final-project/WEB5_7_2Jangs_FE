@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Eye, GitCompare, Play, Trash2 } from "lucide-react"
+import { Eye, GitCompare, Menu, Play, Trash2 } from "lucide-react"
 
 // GraphData 타입 정의
 interface Commit {
@@ -260,9 +260,6 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
 
   return (
     <div className="relative w-full h-full">
-      <div className="absolute top-5 left-5">
-        <h2 className="text-2xl font-bold">{data.title}</h2>
-      </div>
       <div className="w-full h-full border border-gray-200 rounded-lg">
         <ReactFlow
           nodes={nodes}
