@@ -29,31 +29,8 @@ import {
 import { Label } from "./ui/label"
 import { useNavigate } from "react-router"
 import Loading from "./Loading"
-
-interface Document {
-  id: number
-  title: string
-  createdAt: string
-  updatedAt: string
-  preview: string
-}
-
-const mockData: Document[] = [
-  {
-    id: 1,
-    title: "카카오 자소서",
-    createdAt: "2025-07-06T12:00:00Z",
-    updatedAt: "2025-07-07T09:00:00Z",
-    preview: "카카오 가고싶다~",
-  },
-  {
-    id: 2,
-    title: "네이버 자기소개서",
-    createdAt: "2025-06-28T15:30:00Z",
-    updatedAt: "2025-07-01T10:45:00Z",
-    preview: "네이버 가고싶다~",
-  },
-]
+import { type Document, DocumentList } from "@/mock/DocumentList"
+import { formatDate, formatDateForDocuments } from "@/lib/date"
 
 export default function DocumentsList() {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -72,7 +49,7 @@ export default function DocumentsList() {
     const loadDocuments = async () => {
       setIsLoading(true)
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      setDocuments(mockData)
+      setDocuments(DocumentList)
       setIsLoading(false)
     }
 
@@ -84,35 +61,6 @@ export default function DocumentsList() {
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.preview.toLowerCase().includes(searchQuery.toLowerCase()),
   )
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 1) return "어제"
-    if (diffDays < 7) return `${diffDays}일 전`
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)}주 전`
-
-    return date.toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
-
-  const formatDateYMD = (dateString: string) => {
-    const date = new Date(dateString)
-    return date
-      .toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-      .replace(/\. /g, "-")
-      .replace(".", "")
-  }
 
   const handleDocumentClick = (id: number) => {
     console.log(`문서 ${id} 열기`)
@@ -262,10 +210,10 @@ export default function DocumentsList() {
                           {doc.title}
                         </h3>
                         <p className="text-sm text-slate-500">
-                          최종편집일: {formatDate(doc.updatedAt)}
+                          최종편집일: {formatDateForDocuments(doc.updatedAt)}
                         </p>
                         <p className="text-sm text-slate-400">
-                          최초생성일: {formatDateYMD(doc.createdAt)}
+                          최초생성일: {formatDate(doc.createdAt)}
                         </p>
                       </div>
 
@@ -321,10 +269,10 @@ export default function DocumentsList() {
                           {doc.title}
                         </h3>
                         <p className="text-sm text-slate-500 truncate">
-                          최종편집일: {formatDate(doc.updatedAt)}
+                          최종편집일: {formatDateForDocuments(doc.updatedAt)}
                         </p>
                         <p className="text-sm text-slate-400 truncate">
-                          최초생성일: {formatDateYMD(doc.createdAt)}
+                          최초생성일: {formatDate(doc.createdAt)}
                         </p>
                         <p className="text-sm text-slate-600 truncate mt-1">
                           {doc.preview}
