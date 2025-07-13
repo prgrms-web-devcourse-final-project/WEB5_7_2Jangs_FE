@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Eye, GitCompare, Menu, Play, Trash2 } from "lucide-react"
+import { Eye, GitCompare, Menu, Play, Trash2, GitMerge } from "lucide-react"
 
 // GraphData 타입 정의
 interface Commit {
@@ -52,7 +52,7 @@ interface DocumentGraphProps {
   data: GraphDataType
   currentCommitId: string | null
   onNodeMenuClick: (
-    type: "view" | "compare" | "continueEdit" | "delete",
+    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
     commitId: number,
   ) => void
 }
@@ -107,6 +107,11 @@ export default function DocumentGraph({
 }: DocumentGraphProps) {
   // 현재 열린 드롭다운 ID를 관리
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const mainBranch = data.branches.find((b) => b.name === "main")
+
+  const activeCommitId = currentCommitId ?? mainBranch?.leafCommitId?.toString()
+  const isMainBranchLeafCommit =
+    mainBranch?.leafCommitId.toString() === activeCommitId
 
   // 커밋을 React Flow 노드로 변환
   const nodes = useMemo<Node[]>(() => {
@@ -143,7 +148,11 @@ export default function DocumentGraph({
       const isLastCommit = branch?.leafCommitId === commit.id
 
       // 현재 커밋인지 확인
-      const isCurrentCommit = currentCommitId === commit.id.toString()
+      const isCurrentCommit = activeCommitId === commit.id.toString()
+
+      // 머지 버튼을 보여줄지 확인 (현재 커밋이고, 다른 브랜치의 leafNode인 경우)
+      const showMergeButton =
+        !isCurrentCommit && isLastCommit && !isMainBranchLeafCommit
 
       return {
         id: commit.id.toString(),
@@ -217,6 +226,19 @@ export default function DocumentGraph({
                   <Play className="h-4 w-4 mr-2" />
                   이어서 작업하기
                 </DropdownMenuItem>
+                {showMergeButton && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onNodeMenuClick("merge", commit.id)
+                      setOpenDropdownId(null)
+                    }}
+                    className="cursor-pointer text-green-600 focus:text-green-600"
+                  >
+                    <GitMerge className="h-4 w-4 mr-2" />
+                    여기로 머지하기
+                  </DropdownMenuItem>
+                )}
                 {isLastCommit && (
                   <DropdownMenuItem
                     onClick={(e) => {
@@ -245,7 +267,13 @@ export default function DocumentGraph({
         targetPosition: Position.Top,
       }
     })
-  }, [data, openDropdownId, onNodeMenuClick, currentCommitId])
+  }, [
+    data,
+    openDropdownId,
+    onNodeMenuClick,
+    activeCommitId,
+    isMainBranchLeafCommit,
+  ])
 
   // 엣지를 React Flow 엣지로 변환
   const edges = useMemo<Edge[]>(() => {

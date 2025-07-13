@@ -32,9 +32,6 @@ export default function DocumentDetailPage() {
   const mode = (modeParam as Mode) ?? "view"
   const commitId = searchParams.get("commitId")
   const compareCommitId = searchParams.get("compareCommitId")
-  const documentMainBranchLastCommitId = GraphData.branches.find(
-    ({ name }) => name === "main",
-  )?.leafCommitId
 
   const navigate = useNavigate()
   const [editorData, setEditorData] = useState<OutputData | undefined>(EditData)
@@ -59,7 +56,7 @@ export default function DocumentDetailPage() {
   }
 
   const handleNodeMenuClick = (
-    type: "view" | "compare" | "continueEdit" | "delete",
+    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
     newCommitId: number,
   ) => {
     console.log("node click", type, documentId, commitId)
@@ -217,9 +214,7 @@ export default function DocumentDetailPage() {
 
           <DocumentGraph
             data={GraphData}
-            currentCommitId={
-              commitId ?? documentMainBranchLastCommitId?.toString() ?? null
-            }
+            currentCommitId={commitId}
             onNodeMenuClick={handleNodeMenuClick}
           />
         </div>
