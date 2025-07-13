@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "./ui/dialog"
 import { Label } from "./ui/label"
+import { useNavigate } from "react-router"
 
 interface Document {
   id: number
@@ -62,6 +63,8 @@ export default function DocumentsList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newDocumentTitle, setNewDocumentTitle] = useState("")
   const [isCreating, setIsCreating] = useState(false)
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     // 문서 데이터 로드 시뮬레이션
@@ -113,6 +116,7 @@ export default function DocumentsList() {
   const handleDocumentClick = (id: number) => {
     console.log(`문서 ${id} 열기`)
     // 실제로는 문서 편집 페이지로 이동
+    navigate(`/documents/${id}`)
   }
 
   const handleEditTitle = (id: number) => {
