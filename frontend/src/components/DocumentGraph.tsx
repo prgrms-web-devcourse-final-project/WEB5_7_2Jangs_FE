@@ -8,7 +8,14 @@ import ReactFlow, {
   Position,
 } from "reactflow"
 import "reactflow/dist/style.css"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Eye, GitCompare, Play, Trash2 } from "lucide-react"
 
 // GraphData 타입 정의
 interface Commit {
@@ -89,6 +96,9 @@ function getBranchColor(branchName: string): string {
 }
 
 export default function DocumentGraph({ data }: DocumentGraphProps) {
+  // 현재 열린 드롭다운 ID를 관리
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+
   // 커밋을 React Flow 노드로 변환
   const nodes = useMemo<Node[]>(() => {
     // 브랜치별 커밋 그룹화
@@ -120,31 +130,90 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
       const yPosition =
         ((commitTime - minTime) / (maxTime - minTime || 1)) * 400 + 100
 
+      // 브랜치의 마지막 커밋인지 확인
+      const isLastCommit = branch?.leafCommitId === commit.id
+
       return {
         id: commit.id.toString(),
         position: { x: xPosition, y: yPosition },
         data: {
           label: (
-            <div
-              className="p-3 min-w-[180px]"
-              onClick={() => {
-                console.log(commit)
+            <DropdownMenu
+              open={openDropdownId === commit.id.toString()}
+              onOpenChange={(open) => {
+                setOpenDropdownId(open ? commit.id.toString() : null)
               }}
             >
-              <div className="font-semibold text-sm">{commit.title}</div>
-              <div className="text-xs text-gray-600 mt-1">
-                {commit.description}
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                {new Date(commit.createdAt).toLocaleString()}
-              </div>
-              <div
-                className="text-xs mt-2 px-2 py-1 rounded-full inline-block text-white"
-                style={{ backgroundColor: color }}
+              <DropdownMenuTrigger asChild>
+                <div
+                  className="p-3 min-w-[180px] cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="font-semibold text-sm">{commit.title}</div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {commit.description}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {new Date(commit.createdAt).toLocaleString()}
+                  </div>
+                  <div
+                    className="text-xs mt-2 px-2 py-1 rounded-full inline-block text-white"
+                    style={{ backgroundColor: color }}
+                  >
+                    {branchName}
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-44"
+                alignOffset={80}
               >
-                {branchName}
-              </div>
-            </div>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    console.log("문서보기:", commit)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  문서보기
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    console.log("비교하기:", commit)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <GitCompare className="h-4 w-4 mr-2" />
+                  비교하기
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    console.log("이어서 작업하기:", commit)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  이어서 작업하기
+                </DropdownMenuItem>
+                {isLastCommit && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      console.log("삭제하기:", commit)
+                    }}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    삭제하기
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           ),
         },
         style: {
@@ -158,7 +227,7 @@ export default function DocumentGraph({ data }: DocumentGraphProps) {
         targetPosition: Position.Top,
       }
     })
-  }, [data])
+  }, [data, openDropdownId])
 
   // 엣지를 React Flow 엣지로 변환
   const edges = useMemo<Edge[]>(() => {
