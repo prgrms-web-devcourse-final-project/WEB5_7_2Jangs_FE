@@ -29,8 +29,9 @@ export default function DocumentEditor({
     return null
   }, [])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (!containerRef.current || editorRef.current) {
+    if (!containerRef.current || editorRef.current || isReady) {
       return
     }
 
@@ -68,7 +69,7 @@ export default function DocumentEditor({
         editorRef.current = null
       }
     }
-  }, [initialData, isEditable, onDataChange])
+  }, [])
 
   // Handle mode changes
   useEffect(() => {
@@ -78,11 +79,11 @@ export default function DocumentEditor({
   }, [isEditable, isReady])
 
   // Handle data changes
-  useEffect(() => {
-    if (editorRef.current && isReady && initialData) {
-      editorRef.current.render(initialData)
-    }
-  }, [initialData, isReady])
+  // useEffect(() => {
+  //   if (editorRef.current && isReady && initialData) {
+  //     editorRef.current.render(initialData)
+  //   }
+  // }, [initialData, isReady])
 
   // Expose saveData function to parent component
   useEffect(() => {
