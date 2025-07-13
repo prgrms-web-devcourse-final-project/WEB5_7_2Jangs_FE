@@ -32,6 +32,9 @@ export default function DocumentDetailPage() {
   const mode = (modeParam as Mode) ?? "view"
   const commitId = searchParams.get("commitId")
   const compareCommitId = searchParams.get("compareCommitId")
+  const documentMainBranchLastCommitId = GraphData.branches.find(
+    ({ name }) => name === "main",
+  )?.leafCommitId
 
   const navigate = useNavigate()
   const [editorData, setEditorData] = useState<OutputData | undefined>(EditData)
@@ -65,7 +68,7 @@ export default function DocumentDetailPage() {
         navigate(`/documents/${documentId}?mode=view&commitId=${newCommitId}`)
         break
       case "compare": {
-        if (!commitId || !newCommitId) {
+        if (!commitId || !newCommitId || commitId === newCommitId.toString()) {
           return
         }
         const comparedCommitId = newCommitId
@@ -214,7 +217,9 @@ export default function DocumentDetailPage() {
 
           <DocumentGraph
             data={GraphData}
-            currentCommitId={commitId}
+            currentCommitId={
+              commitId ?? documentMainBranchLastCommitId?.toString() ?? null
+            }
             onNodeMenuClick={handleNodeMenuClick}
           />
         </div>
@@ -243,7 +248,11 @@ export default function DocumentDetailPage() {
             {DocumentList.map((doc) => (
               <div
                 key={doc.id}
-                className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                className={`p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
+                  doc.id === Number.parseInt(documentId)
+                    ? "bg-blue-50 border-blue-200"
+                    : ""
+                }`}
                 onClick={() => handleDocumentListModalClick(doc.id)}
               >
                 <div className="flex-1">
