@@ -15,9 +15,15 @@ export function useGraphData({
   isMainBranchLeafCommit,
 }: UseGraphDataProps) {
   // 커밋을 React Flow 노드로 변환
-  const commitNodes = useMemo<GraphNode[]>(() => {
+  const { commitNodes, infoByBranch } = useMemo(() => {
+    // 브랜치별 정보 수집용
+    const infoByBranch: Record<
+      number,
+      { xPosition: number; lastYPosition: number }
+    > = {}
+
     // 노드 생성
-    return data.commits.map((commit) => {
+    const nodes = data.commits.map((commit) => {
       const branch = data.branches.find((b) => b.id === commit.branchId)
       const branchName = branch?.name || "unknown"
       const color = getBranchColor(branchName)
@@ -38,6 +44,16 @@ export function useGraphData({
         ((commitTime - minTime) / (maxTime - minTime || 1)) *
           GRAPH_LAYOUT.HEIGHT_RANGE +
         GRAPH_LAYOUT.BASE_Y_OFFSET
+
+      // 브랜치별 정보 업데이트
+      if (!infoByBranch[commit.branchId]) {
+        infoByBranch[commit.branchId] = { xPosition, lastYPosition: yPosition }
+      } else {
+        infoByBranch[commit.branchId].lastYPosition = Math.max(
+          infoByBranch[commit.branchId].lastYPosition,
+          yPosition,
+        )
+      }
 
       // 브랜치의 마지막 커밋인지 확인
       const isLastCommit = branch?.leafCommitId === commit.id
@@ -72,6 +88,8 @@ export function useGraphData({
         targetPosition: Position.Top,
       } as GraphNode
     })
+
+    return { commitNodes: nodes, infoByBranch }
   }, [data, activeCommitId, isMainBranchLeafCommit])
 
   // 엣지를 React Flow 엣지로 변환
@@ -125,43 +143,33 @@ export function useGraphData({
     })
   }, [data])
 
-  const tempNodes = useMemo<GraphNode[]>(() => {
+  const { tempNodes, tempEdges } = useMemo<{
+    tempNodes: GraphNode[]
+    tempEdges: Edge[]
+  }>(() => {
     const tempNodesArray: GraphNode[] = []
+    const tempEdgesArray: Edge[] = []
 
     // tempId가 있는 브랜치들을 찾아서 tempNode 생성
     for (const branch of data.branches) {
       if (branch.tempId) {
-        // 해당 브랜치의 leafCommit 찾기
-        const leafCommit = data.commits.find(
-          (c) => c.id === branch.leafCommitId,
-        )
-        if (leafCommit) {
-          const branchName = branch.name
-          const color = getBranchColor(branchName)
+        const branchName = branch.name
+        const color = getBranchColor(branchName)
 
-          // 브랜치별로 x 위치 조정 (leafCommit과 같은 위치)
-          const branchIndex = data.branches.findIndex((b) => b.id === branch.id)
-          const xPosition =
-            branchIndex * GRAPH_LAYOUT.BRANCH_SPACING +
-            GRAPH_LAYOUT.BASE_X_OFFSET
-
-          // leafCommit의 y 위치에서 아래로 배치
-          const leafCommitTime = new Date(leafCommit.createdAt).getTime()
-          const allTimes = data.commits.map((c) =>
-            new Date(c.createdAt).getTime(),
-          )
-          const minTime = Math.min(...allTimes)
-          const maxTime = Math.max(...allTimes)
-          const leafYPosition =
-            ((leafCommitTime - minTime) / (maxTime - minTime || 1)) *
-              GRAPH_LAYOUT.HEIGHT_RANGE +
+        // infoByBranch에서 해당 브랜치의 가장 아래 위치 가져오기
+        const branchInfo = infoByBranch[branch.id]
+        if (branchInfo) {
+          // 브랜치의 가장 아래 위치에서 80px 아래에 배치
+          const xPosition = branchInfo.xPosition
+          const yPosition =
+            branchInfo.lastYPosition +
+            GRAPH_LAYOUT.BASE_Y_OFFSET * 0.7 +
             GRAPH_LAYOUT.BASE_Y_OFFSET
 
-          // leafCommit 아래에 위치 (간격 추가)
-          const yPosition = leafYPosition + 80
+          const tempNodeId = `temp-${branch.tempId}`
 
           tempNodesArray.push({
-            id: `temp-${branch.tempId}`,
+            id: tempNodeId,
             position: { x: xPosition, y: yPosition },
             data: {
               nodeType: "temp",
@@ -183,12 +191,31 @@ export function useGraphData({
             sourcePosition: Position.Bottom,
             targetPosition: Position.Top,
           } as GraphNode)
+
+          tempEdgesArray.push({
+            id: `temp-edge-${branch.id}`,
+            source: `commit-${branch.leafCommitId.toString()}`,
+            target: tempNodeId,
+            type: "smoothstep",
+            animated: true,
+            style: {
+              stroke: "#10b981",
+              strokeWidth: 2,
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: "#10b981",
+            },
+          })
         }
       }
     }
 
-    return tempNodesArray
-  }, [data])
+    return { tempNodes: tempNodesArray, tempEdges: tempEdgesArray }
+  }, [data, infoByBranch])
 
-  return { nodes: [...commitNodes, ...tempNodes], edges: [...commitEdges] }
+  return {
+    nodes: [...commitNodes, ...tempNodes],
+    edges: [...commitEdges, ...tempEdges],
+  }
 }

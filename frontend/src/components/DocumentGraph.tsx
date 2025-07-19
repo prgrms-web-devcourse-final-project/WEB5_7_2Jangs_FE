@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react"
 import type { DocumentGraphProps } from "@/types/graph"
 import { useGraphData } from "@/hooks/useGraphData"
 import CommitNode from "@/components/CommitNode"
+import TempNode from "@/components/TempNode"
 
 export default function DocumentGraph({
   data,
@@ -49,7 +50,16 @@ export default function DocumentGraph({
               setOpenDropdownId={handleSetOpenDropdownId}
             />
           ) : (
-            <>temp</>
+            <TempNode
+              tempId={node.data.tempId}
+              branchName={node.data.branchName}
+              color={node.data.color}
+              title={node.data.title}
+              description={node.data.description}
+              onNodeMenuClick={handleNodeMenuClick}
+              openDropdownId={openDropdownId}
+              setOpenDropdownId={handleSetOpenDropdownId}
+            />
           ),
       },
     }))
