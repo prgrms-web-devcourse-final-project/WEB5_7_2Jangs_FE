@@ -1,3 +1,12 @@
+import type { Node } from "reactflow"
+
+export interface GraphNode extends Node {
+  data: {
+    nodeType: "commit" | "temp"
+    [key: string]: any
+  }
+}
+
 export interface Commit {
   id: number
   branchId: number

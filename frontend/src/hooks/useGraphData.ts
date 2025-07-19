@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { type Node, type Edge, MarkerType, Position } from "reactflow"
-import type { GraphDataType, Commit } from "@/types/graph"
+import type { GraphDataType, Commit, GraphNode } from "@/types/graph"
 import { getBranchColor, GRAPH_LAYOUT } from "@/lib/graphUtils"
 
 interface UseGraphDataProps {
@@ -15,16 +15,7 @@ export function useGraphData({
   isMainBranchLeafCommit,
 }: UseGraphDataProps) {
   // 커밋을 React Flow 노드로 변환
-  const nodes = useMemo<Node[]>(() => {
-    // 브랜치별 커밋 그룹화
-    const branchCommits: Record<number, Commit[]> = {}
-    for (const commit of data.commits) {
-      if (!branchCommits[commit.branchId]) {
-        branchCommits[commit.branchId] = []
-      }
-      branchCommits[commit.branchId].push(commit)
-    }
-
+  const commitNodes = useMemo<GraphNode[]>(() => {
     // 노드 생성
     return data.commits.map((commit) => {
       const branch = data.branches.find((b) => b.id === commit.branchId)
@@ -59,9 +50,10 @@ export function useGraphData({
         !isCurrentCommit && isLastCommit && !isMainBranchLeafCommit
 
       return {
-        id: commit.id.toString(),
+        id: `commit-${commit.id.toString()}`,
         position: { x: xPosition, y: yPosition },
         data: {
+          nodeType: "commit",
           commit,
           branchName,
           color,
@@ -78,12 +70,12 @@ export function useGraphData({
         },
         sourcePosition: Position.Bottom,
         targetPosition: Position.Top,
-      }
+      } as GraphNode
     })
   }, [data, activeCommitId, isMainBranchLeafCommit])
 
   // 엣지를 React Flow 엣지로 변환
-  const edges = useMemo<Edge[]>(() => {
+  const commitEdges = useMemo<Edge[]>(() => {
     return data.edges.map((edge) => {
       // 소스와 타겟이 같은 브랜치인지 확인
       const sourceCommit = data.commits.find((c) => c.id === edge.from)
@@ -115,8 +107,8 @@ export function useGraphData({
 
       return {
         id: `edge-${edge.from}-${edge.to}`,
-        source: edge.from.toString(),
-        target: edge.to.toString(),
+        source: `commit-${edge.from.toString()}`,
+        target: `commit-${edge.to.toString()}`,
         sourceHandle,
         targetHandle,
         type: isSameBranch ? "smoothstep" : "default",
@@ -133,5 +125,70 @@ export function useGraphData({
     })
   }, [data])
 
-  return { nodes, edges }
+  const tempNodes = useMemo<GraphNode[]>(() => {
+    const tempNodesArray: GraphNode[] = []
+
+    // tempId가 있는 브랜치들을 찾아서 tempNode 생성
+    for (const branch of data.branches) {
+      if (branch.tempId) {
+        // 해당 브랜치의 leafCommit 찾기
+        const leafCommit = data.commits.find(
+          (c) => c.id === branch.leafCommitId,
+        )
+        if (leafCommit) {
+          const branchName = branch.name
+          const color = getBranchColor(branchName)
+
+          // 브랜치별로 x 위치 조정 (leafCommit과 같은 위치)
+          const branchIndex = data.branches.findIndex((b) => b.id === branch.id)
+          const xPosition =
+            branchIndex * GRAPH_LAYOUT.BRANCH_SPACING +
+            GRAPH_LAYOUT.BASE_X_OFFSET
+
+          // leafCommit의 y 위치에서 아래로 배치
+          const leafCommitTime = new Date(leafCommit.createdAt).getTime()
+          const allTimes = data.commits.map((c) =>
+            new Date(c.createdAt).getTime(),
+          )
+          const minTime = Math.min(...allTimes)
+          const maxTime = Math.max(...allTimes)
+          const leafYPosition =
+            ((leafCommitTime - minTime) / (maxTime - minTime || 1)) *
+              GRAPH_LAYOUT.HEIGHT_RANGE +
+            GRAPH_LAYOUT.BASE_Y_OFFSET
+
+          // leafCommit 아래에 위치 (간격 추가)
+          const yPosition = leafYPosition + 80
+
+          tempNodesArray.push({
+            id: `temp-${branch.tempId}`,
+            position: { x: xPosition, y: yPosition },
+            data: {
+              nodeType: "temp",
+              tempId: branch.tempId,
+              branchName,
+              color,
+              isTemp: true,
+              title: "임시 저장",
+              description: "임시로 저장된 변경사항",
+            },
+            style: {
+              backgroundColor: "#f9fafb",
+              border: `2px dashed ${color}`,
+              borderRadius: "8px",
+              width: "auto",
+              fontSize: "12px",
+              opacity: 0.8,
+            },
+            sourcePosition: Position.Bottom,
+            targetPosition: Position.Top,
+          } as GraphNode)
+        }
+      }
+    }
+
+    return tempNodesArray
+  }, [data])
+
+  return { nodes: [...commitNodes, ...tempNodes], edges: [...commitEdges] }
 }

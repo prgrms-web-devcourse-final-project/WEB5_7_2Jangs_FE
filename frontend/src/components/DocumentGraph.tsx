@@ -35,19 +35,22 @@ export default function DocumentGraph({
       ...node,
       data: {
         ...node.data,
-        label: (
-          <CommitNode
-            commit={node.data.commit}
-            branchName={node.data.branchName}
-            color={node.data.color}
-            isCurrentCommit={node.data.isCurrentCommit}
-            isLastCommit={node.data.isLastCommit}
-            showMergeButton={node.data.showMergeButton}
-            onNodeMenuClick={handleNodeMenuClick}
-            openDropdownId={openDropdownId}
-            setOpenDropdownId={handleSetOpenDropdownId}
-          />
-        ),
+        label:
+          node.data.nodeType === "commit" ? (
+            <CommitNode
+              commit={node.data.commit}
+              branchName={node.data.branchName}
+              color={node.data.color}
+              isCurrentCommit={node.data.isCurrentCommit}
+              isLastCommit={node.data.isLastCommit}
+              showMergeButton={node.data.showMergeButton}
+              onNodeMenuClick={handleNodeMenuClick}
+              openDropdownId={openDropdownId}
+              setOpenDropdownId={handleSetOpenDropdownId}
+            />
+          ) : (
+            <>temp</>
+          ),
       },
     }))
   }, [rawNodes, openDropdownId, handleNodeMenuClick, handleSetOpenDropdownId])
