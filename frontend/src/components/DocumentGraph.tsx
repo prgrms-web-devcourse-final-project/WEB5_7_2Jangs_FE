@@ -9,6 +9,7 @@ import ReactFlow, {
 } from "reactflow"
 import "reactflow/dist/style.css"
 import { useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,6 +108,12 @@ export default function DocumentGraph({
 }: DocumentGraphProps) {
   // 현재 열린 드롭다운 ID를 관리
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  // Hover 상태 관리
+  const [hoveredCommit, setHoveredCommit] = useState<{
+    commit: Commit
+    position: { x: number; y: number }
+  } | null>(null)
+
   const mainBranch = data.branches.find((b) => b.name === "main")
 
   const activeCommitId = currentCommitId ?? mainBranch?.leafCommitId?.toString()
@@ -167,14 +174,27 @@ export default function DocumentGraph({
             >
               <DropdownMenuTrigger asChild>
                 <div
-                  className={`p-3 min-w-[180px] cursor-pointer hover:bg-gray-50 rounded-lg transition-colors ${
+                  className={`relative p-3 w-[180px]  cursor-pointer hover:bg-gray-50 rounded-lg transition-colors ${
                     isCurrentCommit ? "bg-yellow-50 hover:bg-yellow-100" : ""
                   }`}
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setHoveredCommit({
+                      commit,
+                      position: {
+                        x: rect.left,
+                        y: rect.bottom + 8,
+                      },
+                    })
+                  }}
+                  onMouseLeave={() => setHoveredCommit(null)}
                 >
-                  <div className="font-semibold text-sm">{commit.title}</div>
-                  <div className="text-xs text-gray-600 mt-1">
+                  <div className="font-semibold text-sm truncate">
+                    {commit.title}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 truncate">
                     {commit.description}
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
@@ -319,6 +339,36 @@ export default function DocumentGraph({
           <Controls />
         </ReactFlow>
       </div>
+
+      {/* Portal로 렌더링되는 Hover Popover */}
+      {hoveredCommit &&
+        createPortal(
+          <div
+            className="fixed p-3 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[250px] max-w-[300px] pointer-events-none"
+            style={{
+              left: hoveredCommit.position.x,
+              top: hoveredCommit.position.y,
+              zIndex: 9999,
+            }}
+          >
+            <div className="font-semibold text-sm text-gray-900 mb-2">
+              {hoveredCommit.commit.title}
+            </div>
+            <div
+              className="text-xs text-gray-600 leading-relaxed"
+              style={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {hoveredCommit.commit.description}
+            </div>
+            {/* 화살표 */}
+            <div className="absolute bottom-full left-4 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-white"></div>
+            <div className="absolute bottom-full left-4 w-0 h-0 border-l-[7px] border-r-[7px] border-b-[7px] border-l-transparent border-r-transparent border-b-gray-200 -mb-px"></div>
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
