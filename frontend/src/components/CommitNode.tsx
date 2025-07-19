@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { Handle, Position } from "reactflow"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,36 @@ const CommitNode = React.memo(function CommitNode({
 
   return (
     <>
+      {/* React Flow Handles for connections */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ background: "#555" }}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ background: "#555" }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        style={{ background: "#555" }}
+      />
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        style={{ background: "#555" }}
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top"
+        style={{ background: "#555" }}
+      />
+
       <DropdownMenu
         open={openDropdownId === commit.id.toString()}
         onOpenChange={(open) => {

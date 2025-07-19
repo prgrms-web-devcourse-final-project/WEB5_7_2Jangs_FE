@@ -90,10 +90,35 @@ export function useGraphData({
       const targetCommit = data.commits.find((c) => c.id === edge.to)
       const isSameBranch = sourceCommit?.branchId === targetCommit?.branchId
 
+      // 브랜치별 인덱스 계산 (좌우 방향 결정용)
+      const sourceBranchIndex = data.branches.findIndex(
+        (b) => b.id === sourceCommit?.branchId,
+      )
+      const targetBranchIndex = data.branches.findIndex(
+        (b) => b.id === targetCommit?.branchId,
+      )
+
+      // 다른 브랜치로의 연결인 경우 좌우 핸들 사용
+      let sourceHandle: string | undefined
+      let targetHandle: string | undefined
+
+      if (!isSameBranch) {
+        // 타겟이 소스보다 오른쪽에 있으면 소스는 right, 타겟은 left
+        if (targetBranchIndex > sourceBranchIndex) {
+          sourceHandle = "right"
+          targetHandle = "top"
+        } else {
+          sourceHandle = "left"
+          targetHandle = "top"
+        }
+      }
+
       return {
         id: `edge-${edge.from}-${edge.to}`,
         source: edge.from.toString(),
         target: edge.to.toString(),
+        sourceHandle,
+        targetHandle,
         type: isSameBranch ? "smoothstep" : "default",
         animated: !isSameBranch,
         style: {
