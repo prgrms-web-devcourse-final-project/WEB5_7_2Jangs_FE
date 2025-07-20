@@ -32,7 +32,7 @@ export interface Branch {
   tempId: number | null
 }
 
-export interface GraphDataType {
+export type GraphDataType = {
   title: string
   commits: Commit[]
   edges: GraphEdge[]

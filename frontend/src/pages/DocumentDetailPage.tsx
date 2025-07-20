@@ -1,6 +1,7 @@
 import ResizableLayout from "@/layouts/ResizableLayout"
 import DocumentGraph from "@/components/DocumentGraph"
-import { GraphData } from "@/mock/GraphData"
+import { useGraphData } from "@/hooks/useGraphData"
+import { useAuth } from "@/hooks/useAuth"
 import { useParams, useNavigate, useSearchParams } from "react-router"
 import { useEffect, useState } from "react"
 import type { OutputData } from "@editorjs/editorjs"
@@ -29,6 +30,7 @@ export default function DocumentDetailPage() {
   }>()
 
   const [searchParams] = useSearchParams()
+  const { userId } = useAuth()
 
   // 특정 query parameter 값 가져오기
   const modeParam = searchParams.get("mode")
@@ -42,12 +44,26 @@ export default function DocumentDetailPage() {
   const [originalData, setOriginalData] = useState<OutputData | undefined>(
     EditData,
   )
-  const [isLoading, setIsLoading] = useState(true)
   const [isDocumentListOpen, setIsDocumentListOpen] = useState(false)
+  const [isContentLoading, setIsContentLoading] = useState(true)
 
   if (!documentId) {
     throw new Error("Document ID is required")
   }
+
+  if (!userId) {
+    throw new Error("User not authenticated")
+  }
+
+  // API를 통해 그래프 데이터 가져오기
+  const {
+    data: graphData,
+    isLoading: isGraphLoading,
+    error: graphError,
+  } = useGraphData({
+    userId,
+    documentId: Number.parseInt(documentId),
+  })
 
   const handleDataChange = (data: OutputData) => {
     console.log("Editor data changed:", data)
@@ -103,9 +119,11 @@ export default function DocumentDetailPage() {
   }
 
   const handleBranchDelete = async (branchId: number) => {
+    if (!graphData) return
+
     console.log("Branch delete:", branchId)
 
-    const branch = GraphData.branches.find((b) => b.id === branchId)
+    const branch = graphData.branches.find((b) => b.id === branchId)
     if (!branch) return
 
     // 안전성 검사
@@ -122,7 +140,7 @@ export default function DocumentDetailPage() {
       console.log(`브랜치 '${branch.name}'이 삭제되었습니다.`)
 
       // 삭제된 브랜치가 현재 브랜치였다면 메인으로 리다이렉트
-      const currentCommit = GraphData.commits.find(
+      const currentCommit = graphData.commits.find(
         (c) => c.id.toString() === commitId,
       )
       if (currentCommit?.branchId === branchId) {
@@ -137,7 +155,7 @@ export default function DocumentDetailPage() {
   // 데이터 로드 시뮬레이션
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true)
+      setIsContentLoading(true)
 
       // 여기서 실제로는 API를 통해 커밋 데이터를 가져와야 합니다
       if (mode === "compare" && commitId && compareCommitId) {
@@ -158,7 +176,7 @@ export default function DocumentDetailPage() {
         setOriginalData(EditData)
       }
 
-      setIsLoading(false)
+      setIsContentLoading(false)
     }
 
     loadData()
@@ -241,8 +259,30 @@ export default function DocumentDetailPage() {
     return EditData
   }
 
-  if (isLoading) {
+  // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시
+  if (isGraphLoading) {
     return <Loading text="문서를 불러오는 중..." />
+  }
+
+  if (graphError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">
+            오류가 발생했습니다
+          </h2>
+          <p className="text-gray-600">문서를 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!graphData) {
+    return <Loading text="문서를 불러오는 중..." />
+  }
+
+  if (isContentLoading) {
+    return <Loading text="문서 내용을 불러오는 중..." />
   }
 
   return (
@@ -252,7 +292,7 @@ export default function DocumentDetailPage() {
         <div className="p-4 h-[calc(100%-48px)] box-sizing: border-box;">
           <div className="flex justify-between items-center z-10 w-full bg-gray-300 rounded-t-md p-2">
             <button className="cursor-pointer">
-              <h2 className="text-2xl font-bold">{GraphData.title}</h2>
+              <h2 className="text-2xl font-bold">{graphData.title}</h2>
             </button>
             <button
               className="cursor-pointer hover:bg-gray-400 p-1 rounded"
@@ -263,7 +303,7 @@ export default function DocumentDetailPage() {
           </div>
 
           <DocumentGraph
-            data={GraphData}
+            data={graphData}
             currentCommitId={commitId}
             currentTempId={tempId}
             onNodeMenuClick={handleNodeMenuClick}

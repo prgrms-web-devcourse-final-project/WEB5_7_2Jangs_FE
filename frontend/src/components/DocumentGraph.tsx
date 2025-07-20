@@ -1,7 +1,7 @@
 import ReactFlow, { Controls, Background, BackgroundVariant } from "reactflow"
 import "reactflow/dist/style.css"
 import { useState, useMemo, useCallback } from "react"
-import { useGraphData } from "@/hooks/useGraphData"
+import { useGraphRender } from "@/hooks/useGraphData"
 import CommitNode, { type CommitNodeMenuType } from "@/components/CommitNode"
 import TempNode, { type TempNodeMenuType } from "@/components/TempNode"
 import BranchTabs from "@/components/BranchTabs"
@@ -61,7 +61,7 @@ export default function DocumentGraph({
   const handleSetOpenDropdownId = useCallback(setOpenDropdownId, [])
 
   // 커스텀 훅으로 노드와 엣지 데이터 생성
-  const { nodes: rawNodes, edges } = useGraphData({
+  const { nodes: rawNodes, edges } = useGraphRender({
     data,
     activeCommitId,
     activeTempId,
@@ -70,7 +70,7 @@ export default function DocumentGraph({
 
   // 노드에 label (CommitNode 컴포넌트) 추가 - 메모이제이션
   const nodes = useMemo(() => {
-    return rawNodes.map((node) => ({
+    return rawNodes.map((node: any) => ({
       ...node,
       data: {
         ...node.data,

@@ -2,20 +2,91 @@ import { useMemo } from "react"
 import { type Node, type Edge, MarkerType, Position } from "reactflow"
 import type { GraphDataType, Commit, GraphNode } from "@/types/graph"
 import { getBranchColor, GRAPH_LAYOUT } from "@/lib/graphUtils"
+import { useQuery } from "@tanstack/react-query"
+import { apiClient } from "@/api/apiClient"
+import type {
+  CommitGraphResponse,
+  CommitDto,
+  BranchDto,
+  EdgeDto,
+} from "@/api/__generated__"
 
-interface UseGraphDataProps {
+interface UseGraphRenderProps {
   data: GraphDataType
   activeCommitId?: string | null
   activeTempId?: string | null
   isMainBranchLeafCommit: boolean
 }
 
-export function useGraphData({
+interface UseGraphDataProps {
+  userId: number
+  documentId: number
+}
+
+// API 호출과 데이터 변환을 담당하는 새로운 useGraphData 훅
+export function useGraphData({ userId, documentId }: UseGraphDataProps) {
+  return useQuery({
+    queryKey: ["graphData", userId, documentId],
+    queryFn: async (): Promise<GraphDataType> => {
+      const response = await apiClient.document.getGraph({
+        userId,
+        docId: documentId,
+      })
+
+      return transformApiResponseToGraphData(response)
+    },
+    enabled: !!(userId && documentId),
+  })
+}
+
+// API 응답을 로컬 타입으로 변환하는 함수
+function transformApiResponseToGraphData(
+  response: CommitGraphResponse,
+): GraphDataType {
+  return {
+    title: response.title || "",
+    commits: (response.commits || []).map(transformCommitDto),
+    edges: (response.edges || []).map(transformEdgeDto),
+    branches: (response.branches || []).map(transformBranchDto),
+  }
+}
+
+function transformCommitDto(dto: CommitDto): Commit {
+  return {
+    id: dto.id || 0,
+    branchId: dto.branchId || 0,
+    title: dto.title || "",
+    description: dto.description || "",
+    createdAt: dto.createdAt?.toISOString() || new Date().toISOString(),
+  }
+}
+
+function transformBranchDto(dto: BranchDto) {
+  return {
+    id: dto.id || 0,
+    name: dto.name || "",
+    createdAt: dto.createdAt?.toISOString() || new Date().toISOString(),
+    fromCommitId: dto.fromCommitId || null,
+    rootCommitId: dto.rootCommitId || 0,
+    leafCommitId: dto.leafCommitId || 0,
+    tempId: dto.saveId || null, // saveId를 tempId로 매핑
+  }
+}
+
+function transformEdgeDto(dto: EdgeDto) {
+  return {
+    from: dto.from || 0,
+    to: dto.to || 0,
+  }
+}
+
+// React Flow 렌더링을 위한 데이터 변환 훅 (기존 useGraphData에서 이름 변경)
+export function useGraphRender({
   data,
   activeCommitId,
   activeTempId,
   isMainBranchLeafCommit,
-}: UseGraphDataProps) {
+}: UseGraphRenderProps) {
   // 커밋을 React Flow 노드로 변환
   const { commitNodes, infoByBranch } = useMemo(() => {
     // 브랜치별 정보 수집용
