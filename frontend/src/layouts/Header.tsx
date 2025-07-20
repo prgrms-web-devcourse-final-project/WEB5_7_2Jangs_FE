@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router"
 import Logo from "../components/Logo"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function Header() {
   const navigate = useNavigate()
+  const { isAuthenticated, logout } = useAuth()
 
   const handleSignUp = () => {
     navigate("/signup")
@@ -11,6 +13,11 @@ export default function Header() {
 
   const handleLogin = () => {
     navigate("/login")
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate("/")
   }
 
   return (
@@ -23,22 +30,34 @@ export default function Header() {
             </div>
           </Link>
 
-          <div className="flex items-center space-x-4">
+          {isAuthenticated ? (
             <Button
-              onClick={handleSignUp}
+              onClick={handleLogout}
               variant="outline"
               className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
             >
-              회원가입
+              로그아웃
             </Button>
-            <Button
-              onClick={handleLogin}
-              variant="outline"
-              className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
-            >
-              로그인
-            </Button>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={handleSignUp}
+                  variant="outline"
+                  className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
+                >
+                  회원가입
+                </Button>
+                <Button
+                  onClick={handleLogin}
+                  variant="outline"
+                  className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
+                >
+                  로그인
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </header>

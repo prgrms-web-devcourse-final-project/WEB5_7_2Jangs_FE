@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,16 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Eye, EyeOff, Mail, Lock, CheckCircle } from "lucide-react"
-import { useNavigate } from "react-router"
+import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import { apiClient } from "@/api/apiClient"
 
 const loginSchema = z.object({
@@ -37,13 +26,10 @@ type LoginFormData = z.infer<typeof loginSchema>
 export default function LoginForm({
   onSuccess,
 }: {
-  onSuccess: () => void
+  onSuccess: (user: { id: number; email: string }) => void
 }) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
-  // Dialog state
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
   const {
     register,
@@ -60,14 +46,22 @@ export default function LoginForm({
     try {
       // 로그인 로직 구현
       console.log("로그인 데이터:", data)
-      await apiClient.user.login({
+      const { id } = await apiClient.user.login({
         userLoginRequest: {
           email: data.email,
           password: data.password,
         },
       })
 
-      setShowSuccessDialog(true)
+      if (!id) {
+        throw new Error("로그인 실패")
+      }
+
+      onSuccess({
+        id,
+        email: data.email,
+      })
+
       // 실제로는 리다이렉트 또는 상태 업데이트
     } catch (error) {
       setError("root", {
@@ -79,11 +73,6 @@ export default function LoginForm({
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleSuccessDialogClose = () => {
-    setShowSuccessDialog(false)
-    onSuccess()
   }
 
   return (
@@ -210,28 +199,6 @@ export default function LoginForm({
           </CardContent>
         </Card>
       </div>
-
-      {/* Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={handleSuccessDialogClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <DialogTitle className="text-lg font-semibold">
-                로그인 성공
-              </DialogTitle>
-            </div>
-            <DialogDescription className="text-base text-slate-600">
-              로그인이 완료되었습니다!
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={handleSuccessDialogClose} className="w-full">
-              확인
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

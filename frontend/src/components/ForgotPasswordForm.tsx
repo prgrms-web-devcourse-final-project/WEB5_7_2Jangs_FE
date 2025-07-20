@@ -153,7 +153,7 @@ export default function ForgotPasswordForm({
       setDialogContent({
         title: "인증 완료",
         description: "이메일 인증이 완료되었습니다!",
-        type: "success",
+        type: "info",
       })
       setShowDialog(true)
     } catch (error) {
@@ -262,6 +262,7 @@ export default function ForgotPasswordForm({
   }
 
   const handleDialogClose = () => {
+    console.log("dialogContent", dialogContent)
     setShowDialog(false)
     if (dialogContent.type === "success") {
       onSuccess()
@@ -560,7 +561,10 @@ export default function ForgotPasswordForm({
       </div>
 
       {/* Success/Info Dialog */}
-      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+      <Dialog
+        open={showDialog}
+        onOpenChange={(open) => !open && handleDialogClose()}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-2">
@@ -576,7 +580,7 @@ export default function ForgotPasswordForm({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setShowDialog(false)} className="w-full">
+            <Button onClick={handleDialogClose} className="w-full">
               확인
             </Button>
           </DialogFooter>

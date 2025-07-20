@@ -18,7 +18,6 @@ import DeleteDocumentDialog from "./documents/DeleteDocumentDialog"
 export default function DocumentsList() {
   const navigate = useNavigate()
 
-  // Custom hooks
   const {
     documents,
     searchQuery,
@@ -26,9 +25,7 @@ export default function DocumentsList() {
     viewMode,
     toggleViewMode,
     isLoading,
-    error,
     filteredDocuments,
-    refetch,
   } = useDocuments()
 
   const createDocument = useCreateDocument()

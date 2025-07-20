@@ -1,12 +1,18 @@
 import { useNavigate } from "react-router"
 import Logo from "../components/Logo"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const handleGetStarted = () => {
-    navigate("/signup")
+    if (isAuthenticated) {
+      navigate("/documents")
+    } else {
+      navigate("/signup")
+    }
   }
 
   return (
