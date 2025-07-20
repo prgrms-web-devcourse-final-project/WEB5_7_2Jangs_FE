@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "format": "yarn biome format --write",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "codegen": "openapi-generator-cli generate -i http://3.34.159.207:8080/v3/api-docs -g typescript-fetch -o src/api/__generated__"
   },
   "dependencies": {
     "@editorjs/code": "^2.9.3",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@openapitools/openapi-generator-cli": "^2.20.0",
     "@types/diff-match-patch": "^1.0.36",
     "@types/node": "^24.0.10",
     "@types/react": "^19.0.10",
