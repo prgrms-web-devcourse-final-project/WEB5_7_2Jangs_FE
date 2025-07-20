@@ -8,18 +8,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Play } from "lucide-react"
 import { GRAPH_LAYOUT } from "@/lib/graphUtils"
-import CommitTooltip from "@/components/CommitTooltip"
+
+export type TempNodeMenuType = "temp-edit"
 
 interface TempNodeProps {
   tempId: number
   branchName: string
   color: string
+  isCurrentTemp: boolean
   title: string
   description: string
-  onNodeMenuClick: (
-    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
-    commitId: number,
-  ) => void
+  onNodeMenuClick: (type: "temp-edit", commitId: number) => void
   openDropdownId: string | null
   setOpenDropdownId: (id: string | null) => void
 }
@@ -28,6 +27,7 @@ const TempNode = React.memo(function TempNode({
   tempId,
   branchName,
   color,
+  isCurrentTemp,
   title,
   description,
   onNodeMenuClick,
@@ -80,7 +80,9 @@ const TempNode = React.memo(function TempNode({
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="relative p-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors bg-gray-50 hover:bg-gray-100"
+            className={`relative p-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors ${
+              isCurrentTemp ? "bg-yellow-50 hover:bg-yellow-100" : ""
+            }`}
             style={{ width: GRAPH_LAYOUT.NODE_WIDTH }}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
@@ -115,13 +117,13 @@ const TempNode = React.memo(function TempNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("continueEdit", tempId)
+              onNodeMenuClick("temp-edit", tempId)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
           >
             <Play className="h-4 w-4 mr-2" />
-            이어서 작업하기
+            작업하기
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

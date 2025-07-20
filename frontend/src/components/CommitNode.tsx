@@ -11,6 +11,13 @@ import type { Commit } from "@/types/graph"
 import { GRAPH_LAYOUT } from "@/lib/graphUtils"
 import CommitTooltip from "@/components/CommitTooltip"
 
+export type CommitNodeMenuType =
+  | "commit-view"
+  | "commit-compare"
+  | "commit-continueEdit"
+  | "commit-delete"
+  | "commit-merge"
+
 interface CommitNodeProps {
   commit: Commit
   branchName: string
@@ -18,10 +25,7 @@ interface CommitNodeProps {
   isCurrentCommit: boolean
   isLastCommit: boolean
   showMergeButton: boolean
-  onNodeMenuClick: (
-    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
-    commitId: number,
-  ) => void
+  onNodeMenuClick: (type: CommitNodeMenuType, commitId: number) => void
   openDropdownId: string | null
   setOpenDropdownId: (id: string | null) => void
 }
@@ -120,7 +124,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("view", commit.id)
+              onNodeMenuClick("commit-view", commit.id)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -131,7 +135,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("compare", commit.id)
+              onNodeMenuClick("commit-compare", commit.id)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -142,7 +146,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("continueEdit", commit.id)
+              onNodeMenuClick("commit-continueEdit", commit.id)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -154,7 +158,7 @@ const CommitNode = React.memo(function CommitNode({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeMenuClick("merge", commit.id)
+                onNodeMenuClick("commit-merge", commit.id)
                 setOpenDropdownId(null)
               }}
               className="cursor-pointer text-green-600 focus:text-green-600"
@@ -167,7 +171,7 @@ const CommitNode = React.memo(function CommitNode({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeMenuClick("delete", commit.id)
+                onNodeMenuClick("commit-delete", commit.id)
                 setOpenDropdownId(null)
               }}
               className="cursor-pointer text-red-600 focus:text-red-600"

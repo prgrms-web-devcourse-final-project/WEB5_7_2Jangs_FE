@@ -1,3 +1,5 @@
+import type { CommitNodeMenuType } from "@/components/CommitNode"
+import type { TempNodeMenuType } from "@/components/TempNode"
 import type { Node } from "reactflow"
 
 export interface GraphNode extends Node {
@@ -35,15 +37,6 @@ export interface GraphDataType {
   commits: Commit[]
   edges: GraphEdge[]
   branches: Branch[]
-}
-
-export interface DocumentGraphProps {
-  data: GraphDataType
-  currentCommitId: string | null
-  onNodeMenuClick: (
-    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
-    commitId: number,
-  ) => void
 }
 
 export interface HoveredCommit {

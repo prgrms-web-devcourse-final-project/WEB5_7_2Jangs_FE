@@ -1,21 +1,36 @@
 import ReactFlow, { Controls, Background, BackgroundVariant } from "reactflow"
 import "reactflow/dist/style.css"
 import { useState, useMemo, useCallback } from "react"
-import type { DocumentGraphProps } from "@/types/graph"
 import { useGraphData } from "@/hooks/useGraphData"
-import CommitNode from "@/components/CommitNode"
-import TempNode from "@/components/TempNode"
+import CommitNode, { type CommitNodeMenuType } from "@/components/CommitNode"
+import TempNode, { type TempNodeMenuType } from "@/components/TempNode"
+import type { GraphDataType } from "@/types/graph"
+
+export interface DocumentGraphProps {
+  data: GraphDataType
+  currentCommitId: string | null
+  currentTempId: string | null
+  onNodeMenuClick: (
+    type: CommitNodeMenuType | TempNodeMenuType,
+    commitId: number,
+  ) => void
+}
 
 export default function DocumentGraph({
   data,
   currentCommitId,
+  currentTempId,
   onNodeMenuClick,
 }: DocumentGraphProps) {
   // 현재 열린 드롭다운 ID를 관리
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
 
   const mainBranch = data.branches.find((b) => b.name === "main")
-  const activeCommitId = currentCommitId ?? mainBranch?.leafCommitId?.toString()
+  const activeCommitId =
+    currentCommitId ??
+    (currentTempId ? null : mainBranch?.leafCommitId?.toString())
+  const activeTempId = currentTempId
+
   const isMainBranchLeafCommit =
     mainBranch?.leafCommitId.toString() === activeCommitId
 
@@ -27,6 +42,7 @@ export default function DocumentGraph({
   const { nodes: rawNodes, edges } = useGraphData({
     data,
     activeCommitId,
+    activeTempId,
     isMainBranchLeafCommit,
   })
 
@@ -54,6 +70,7 @@ export default function DocumentGraph({
               tempId={node.data.tempId}
               branchName={node.data.branchName}
               color={node.data.color}
+              isCurrentTemp={node.data.isCurrentTemp}
               title={node.data.title}
               description={node.data.description}
               onNodeMenuClick={handleNodeMenuClick}

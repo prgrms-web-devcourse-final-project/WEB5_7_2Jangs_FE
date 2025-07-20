@@ -1,6 +1,5 @@
 import ResizableLayout from "@/layouts/ResizableLayout"
 import DocumentGraph from "@/components/DocumentGraph"
-import DocumentEditor from "@/components/DocumentEditor"
 import { GraphData } from "@/mock/GraphData"
 import { useParams, useNavigate, useSearchParams } from "react-router"
 import { useEffect, useState } from "react"
@@ -14,9 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { type Document, DocumentList } from "@/mock/DocumentList"
-import { formatDate, formatDateForDocuments } from "@/lib/date"
+import { DocumentList } from "@/mock/DocumentList"
+import { formatDateForDocuments } from "@/lib/date"
 import DocumentContent from "@/components/DocumentContent"
+import type { CommitNodeMenuType } from "@/components/CommitNode"
+import type { TempNodeMenuType } from "@/components/TempNode"
 
 export type Mode = "view" | "edit" | "compare" | "delete"
 
@@ -32,6 +33,7 @@ export default function DocumentDetailPage() {
   const mode = (modeParam as Mode) ?? "view"
   const commitId = searchParams.get("commitId")
   const compareCommitId = searchParams.get("compareCommitId")
+  const tempId = searchParams.get("tempId")
 
   const navigate = useNavigate()
   const [editorData, setEditorData] = useState<OutputData | undefined>(EditData)
@@ -56,40 +58,44 @@ export default function DocumentDetailPage() {
   }
 
   const handleNodeMenuClick = (
-    type: "view" | "compare" | "continueEdit" | "delete" | "merge",
-    newCommitId: number,
+    type: CommitNodeMenuType | TempNodeMenuType,
+    idByType: number, // commitId or tempId
   ) => {
     console.log("node click", type, documentId, commitId)
     switch (type) {
-      case "view":
-        navigate(`/documents/${documentId}?mode=view&commitId=${newCommitId}`)
+      case "commit-view":
+        navigate(`/documents/${documentId}?mode=view&commitId=${idByType}`)
         break
-      case "compare": {
-        if (!commitId || !newCommitId || commitId === newCommitId.toString()) {
+      case "commit-compare": {
+        if (!commitId || !idByType || commitId === idByType.toString()) {
           return
         }
-        const comparedCommitId = newCommitId
+        const comparedCommitId = idByType
 
         navigate(
           `/documents/${documentId}?mode=compare&commitId=${commitId}&compareCommitId=${comparedCommitId}`,
         )
         break
       }
-      case "continueEdit":
+      case "commit-continueEdit":
         navigate(`/documents/${documentId}?mode=edit&commitId=${commitId}`)
         break
-      case "merge": {
+      case "commit-merge": {
         // 현재 커밋과 선택된 커밋을 병합
-        if (!commitId || !newCommitId || commitId === newCommitId.toString()) {
+        if (!commitId || !idByType || commitId === idByType.toString()) {
           return
         }
         navigate(
-          `/merge?documentId=${documentId}&baseCommitId=${commitId}&targetCommitId=${newCommitId}`,
+          `/merge?documentId=${documentId}&baseCommitId=${commitId}&targetCommitId=${idByType}`,
         )
         break
       }
-      case "delete":
+      case "commit-delete":
         // 삭제처리
+        break
+      case "temp-edit":
+        console.log("temp-edit", idByType)
+        navigate(`/documents/${documentId}?mode=edit&tempId=${idByType}`)
         break
     }
   }
@@ -225,6 +231,7 @@ export default function DocumentDetailPage() {
           <DocumentGraph
             data={GraphData}
             currentCommitId={commitId}
+            currentTempId={tempId}
             onNodeMenuClick={handleNodeMenuClick}
           />
         </div>

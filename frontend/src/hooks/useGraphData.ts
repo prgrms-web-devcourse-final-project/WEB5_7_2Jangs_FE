@@ -5,13 +5,15 @@ import { getBranchColor, GRAPH_LAYOUT } from "@/lib/graphUtils"
 
 interface UseGraphDataProps {
   data: GraphDataType
-  activeCommitId: string | undefined
+  activeCommitId?: string | null
+  activeTempId?: string | null
   isMainBranchLeafCommit: boolean
 }
 
 export function useGraphData({
   data,
   activeCommitId,
+  activeTempId,
   isMainBranchLeafCommit,
 }: UseGraphDataProps) {
   // 커밋을 React Flow 노드로 변환
@@ -168,6 +170,9 @@ export function useGraphData({
 
           const tempNodeId = `temp-${branch.tempId}`
 
+          // 현재 커밋인지 확인
+          const isCurrentTemp = activeTempId === branch.tempId.toString()
+
           tempNodesArray.push({
             id: tempNodeId,
             position: { x: xPosition, y: yPosition },
@@ -176,6 +181,7 @@ export function useGraphData({
               tempId: branch.tempId,
               branchName,
               color,
+              isCurrentTemp,
               isTemp: true,
               title: "임시 저장",
               description: "임시로 저장된 변경사항",
@@ -212,7 +218,7 @@ export function useGraphData({
     }
 
     return { tempNodes: tempNodesArray, tempEdges: tempEdgesArray }
-  }, [data, infoByBranch])
+  }, [data, infoByBranch, activeTempId])
 
   return {
     nodes: [...commitNodes, ...tempNodes],
