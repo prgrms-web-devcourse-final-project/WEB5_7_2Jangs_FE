@@ -85,10 +85,15 @@ export default function DocumentsList() {
       doc.preview.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleDocumentClick = (id: number) => {
-    console.log(`문서 ${id} 열기`)
+  const handleDocumentClick = (doc: Document) => {
+    console.log(`문서 ${doc.id} 열기`)
+    const { recentType, recentTypeId } = doc.recent
     // 실제로는 문서 편집 페이지로 이동
-    navigate(`/documents/${id}`)
+    if (recentType === "SAVE") {
+      navigate(`/documents/${doc.id}`)
+    } else if (recentType === "COMMIT") {
+      navigate(`/documents/${doc.id}`)
+    }
   }
 
   const handleEditTitle = (id: number) => {
@@ -169,7 +174,16 @@ export default function DocumentsList() {
       // 새 문서 생성 시뮬레이션
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
+      const newDocument = {
+        id: 0,
+        tempId: 0,
+      }
+
       closeCreateModal()
+
+      navigate(
+        `/documents/${newDocument.id}?mode=save&tempId=${newDocument.tempId}`,
+      )
       console.log("새 문서 생성됨")
     } catch (error) {
       console.error("문서 생성 실패:", error)
@@ -249,7 +263,7 @@ export default function DocumentsList() {
               <Card
                 key={doc.id}
                 className="cursor-pointer hover:shadow-lg transition-all duration-200 border-0 bg-white/80 backdrop-blur-sm hover:bg-white group relative"
-                onClick={() => handleDocumentClick(doc.id)}
+                onClick={() => handleDocumentClick(doc)}
               >
                 <CardContent className="p-0">
                   {viewMode === "grid" ? (

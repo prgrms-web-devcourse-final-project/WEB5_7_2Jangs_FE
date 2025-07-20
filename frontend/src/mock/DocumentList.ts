@@ -4,6 +4,10 @@ export interface Document {
   createdAt: string
   updatedAt: string
   preview: string
+  recent: {
+    recentType: string
+    recentTypeId: number
+  }
 }
 
 export const DocumentList: Document[] = [
@@ -13,6 +17,10 @@ export const DocumentList: Document[] = [
     createdAt: "2025-07-06T12:00:00Z",
     updatedAt: "2025-07-07T09:00:00Z",
     preview: "카카오 가고싶다~",
+    recent: {
+      recentType: "SAVE",
+      recentTypeId: 2,
+    },
   },
   {
     id: 2,
@@ -20,5 +28,9 @@ export const DocumentList: Document[] = [
     createdAt: "2025-06-28T15:30:00Z",
     updatedAt: "2025-07-01T10:45:00Z",
     preview: "네이버 가고싶다~",
+    recent: {
+      recentType: "COMMIT",
+      recentTypeId: 2,
+    },
   },
 ]

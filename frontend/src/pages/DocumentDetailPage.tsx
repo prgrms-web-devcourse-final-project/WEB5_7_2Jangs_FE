@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/dialog"
 import { DocumentList } from "@/mock/DocumentList"
 import { formatDateForDocuments } from "@/lib/date"
-import DocumentContent from "@/components/DocumentContent"
+import DocumentContent, {
+  type DocumentContentMode,
+} from "@/components/DocumentContent"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
 
-export type Mode = "view" | "edit" | "compare" | "delete"
+export type Mode = "commit" | "compare" | "save"
 
 export default function DocumentDetailPage() {
   const { id: documentId } = useParams<{
@@ -30,7 +32,7 @@ export default function DocumentDetailPage() {
 
   // 특정 query parameter 값 가져오기
   const modeParam = searchParams.get("mode")
-  const mode = (modeParam as Mode) ?? "view"
+  const mode = (modeParam as Mode) ?? "save"
   const commitId = searchParams.get("commitId")
   const compareCommitId = searchParams.get("compareCommitId")
   const tempId = searchParams.get("tempId")
@@ -64,7 +66,7 @@ export default function DocumentDetailPage() {
     console.log("node click", type, documentId, commitId)
     switch (type) {
       case "commit-view":
-        navigate(`/documents/${documentId}?mode=view&commitId=${idByType}`)
+        navigate(`/documents/${documentId}?mode=commit&commitId=${idByType}`)
         break
       case "commit-compare": {
         if (!commitId || !idByType || commitId === idByType.toString()) {
@@ -78,7 +80,7 @@ export default function DocumentDetailPage() {
         break
       }
       case "commit-continueEdit":
-        navigate(`/documents/${documentId}?mode=edit&commitId=${commitId}`)
+        // navigate(`/documents/${documentId}?mode=edit&commitId=${commitId}`)
         break
       case "commit-merge": {
         // 현재 커밋과 선택된 커밋을 병합
@@ -95,7 +97,7 @@ export default function DocumentDetailPage() {
         break
       case "temp-edit":
         console.log("temp-edit", idByType)
-        navigate(`/documents/${documentId}?mode=edit&tempId=${idByType}`)
+        navigate(`/documents/${documentId}?mode=save&tempId=${idByType}`)
         break
     }
   }
@@ -272,7 +274,7 @@ export default function DocumentDetailPage() {
         {/* 메인 컨텐츠 - 에디터 */}
         <div className="p-4 h-[calc(100%)] box-sizing: border-box;">
           <DocumentContent
-            mode={mode}
+            mode={getDocumentContentMode(mode)}
             editorData={editorData}
             originalData={originalData}
             onDataChange={handleDataChange}
@@ -315,4 +317,15 @@ export default function DocumentDetailPage() {
       </Dialog>
     </>
   )
+}
+
+function getDocumentContentMode(mode: Mode): DocumentContentMode {
+  switch (mode) {
+    case "commit":
+      return "view"
+    case "save":
+      return "edit"
+    case "compare":
+      return "compare"
+  }
 }

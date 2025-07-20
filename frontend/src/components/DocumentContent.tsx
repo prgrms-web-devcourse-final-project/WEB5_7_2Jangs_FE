@@ -1,8 +1,9 @@
-import type { Mode } from "@/pages/DocumentDetailPage"
 import DocumentEditor from "./DocumentEditor"
 import DocumentCompareView from "./DocumentCompareView"
 import type { OutputData } from "@editorjs/editorjs"
 import { EditData } from "@/mock/EditData"
+
+export type DocumentContentMode = "edit" | "view" | "compare"
 
 export default function DocumentContent({
   mode,
@@ -10,7 +11,7 @@ export default function DocumentContent({
   originalData,
   onDataChange,
 }: {
-  mode: Mode
+  mode: DocumentContentMode
   editorData?: OutputData
   originalData?: OutputData
   onDataChange: (data: OutputData) => void
