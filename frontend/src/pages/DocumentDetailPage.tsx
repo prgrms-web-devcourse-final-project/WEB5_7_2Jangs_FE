@@ -100,6 +100,38 @@ export default function DocumentDetailPage() {
     }
   }
 
+  const handleBranchDelete = async (branchId: number) => {
+    console.log("Branch delete:", branchId)
+
+    const branch = GraphData.branches.find((b) => b.id === branchId)
+    if (!branch) return
+
+    // 안전성 검사
+    if (branch.name === "main") {
+      alert("메인 브랜치는 삭제할 수 없습니다.")
+      return
+    }
+
+    try {
+      // TODO: 실제 API 호출
+      // await deleteBranch(branchId)
+
+      // 임시로 콘솔 로그
+      console.log(`브랜치 '${branch.name}'이 삭제되었습니다.`)
+
+      // 삭제된 브랜치가 현재 브랜치였다면 메인으로 리다이렉트
+      const currentCommit = GraphData.commits.find(
+        (c) => c.id.toString() === commitId,
+      )
+      if (currentCommit?.branchId === branchId) {
+        navigate(`/documents/${documentId}`)
+      }
+    } catch (error) {
+      console.error("브랜치 삭제 중 오류:", error)
+      alert("브랜치 삭제 중 오류가 발생했습니다.")
+    }
+  }
+
   // 데이터 로드 시뮬레이션
   useEffect(() => {
     const loadData = async () => {
@@ -233,6 +265,7 @@ export default function DocumentDetailPage() {
             currentCommitId={commitId}
             currentTempId={tempId}
             onNodeMenuClick={handleNodeMenuClick}
+            onBranchDelete={handleBranchDelete}
           />
         </div>
 
