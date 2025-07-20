@@ -30,6 +30,8 @@ import {
   ArrowLeft,
   CheckCircle,
 } from "lucide-react"
+import { apiClient } from "@/api/apiClient"
+import { CodeCheckRequestTypeEnum } from "@/api/__generated__"
 
 const emailVerificationSchema = z.object({
   email: z.string().email("올바른 이메일 주소를 입력해주세요"),
@@ -58,13 +60,19 @@ const passwordResetSchema = z
 type EmailVerificationData = z.infer<typeof emailVerificationSchema>
 type PasswordResetData = z.infer<typeof passwordResetSchema>
 
-export default function ForgotPasswordForm() {
+export default function ForgotPasswordForm({
+  onSuccess,
+}: {
+  onSuccess: () => void
+}) {
   const [step, setStep] = useState<1 | 2>(1)
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [userEmail, setUserEmail] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isCodeVerified, setIsCodeVerified] = useState(false)
+  const [verifiedPassCode, setVerifiedPassCode] = useState("")
 
   // 재발송 타이머 상태 (5분 = 300초)
   const [resendTimer, setResendTimer] = useState(0)
@@ -91,6 +99,7 @@ export default function ForgotPasswordForm() {
   })
 
   const email = emailForm.watch("email")
+  const verificationCode = emailForm.watch("verificationCode")
 
   // 재발송 타이머 관리
   useEffect(() => {
@@ -122,6 +131,41 @@ export default function ForgotPasswordForm() {
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
   }
 
+  // 인증코드 확인
+  const verifyCode = async () => {
+    const isCodeValid = await emailForm.trigger("verificationCode")
+    if (!isCodeValid || !verificationCode || !email) return
+
+    setIsLoading(true)
+    try {
+      console.log("인증코드 확인:", { email, code: verificationCode })
+
+      const response = await apiClient.auth.checkCode({
+        codeCheckRequest: {
+          email: email,
+          code: verificationCode,
+          type: CodeCheckRequestTypeEnum.ResetPassword,
+        },
+      })
+
+      setIsCodeVerified(true)
+      setVerifiedPassCode(response.passCode || "")
+      setDialogContent({
+        title: "인증 완료",
+        description: "이메일 인증이 완료되었습니다!",
+        type: "success",
+      })
+      setShowDialog(true)
+    } catch (error) {
+      console.error("인증코드 확인 실패:", error)
+      emailForm.setError("verificationCode", {
+        message: "인증코드가 올바르지 않습니다. 다시 시도해주세요.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   /* 인증코드 발송 */
   const sendVerificationCode = async () => {
     const isEmailValid = await emailForm.trigger("email")
@@ -130,7 +174,12 @@ export default function ForgotPasswordForm() {
     setIsLoading(true)
     try {
       console.log("인증코드 발송:", email)
-      await new Promise((r) => setTimeout(r, 1000))
+      const response = await apiClient.auth.sendResetPwdCode({
+        pwdResetCodeRequest: {
+          email,
+        },
+      })
+      console.log("인증코드 발송 응답:", response)
 
       // 성공 시 타이머 시작 (5분 = 300초)
       setIsCodeSent(true)
@@ -150,10 +199,16 @@ export default function ForgotPasswordForm() {
 
   /* 1단계 제출 */
   const onEmailVerificationSubmit = async (data: EmailVerificationData) => {
+    if (!isCodeVerified) {
+      emailForm.setError("verificationCode", {
+        message: "먼저 인증코드를 확인해주세요.",
+      })
+      return
+    }
+
     setIsLoading(true)
     try {
       console.log("이메일 인증 데이터:", data)
-      await new Promise((r) => setTimeout(r, 1200))
       setUserEmail(data.email)
 
       passwordForm.reset({
@@ -164,7 +219,7 @@ export default function ForgotPasswordForm() {
       setStep(2)
       setDialogContent({
         title: "인증 완료",
-        description: "인증이 완료되었습니다!",
+        description: "이제 새 비밀번호를 설정해주세요!",
         type: "success",
       })
       setShowDialog(true)
@@ -182,7 +237,15 @@ export default function ForgotPasswordForm() {
     setIsLoading(true)
     try {
       console.log("비밀번호 재설정:", { email: userEmail, ...data })
-      await new Promise((r) => setTimeout(r, 1200))
+
+      await apiClient.user.resetPassword({
+        passwordResetRequest: {
+          email: userEmail,
+          password: data.password,
+          passCode: verifiedPassCode,
+        },
+      })
+
       setDialogContent({
         title: "비밀번호 변경 완료",
         description: "비밀번호가 변경되었습니다! 이제 로그인하세요.",
@@ -195,6 +258,13 @@ export default function ForgotPasswordForm() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDialogClose = () => {
+    setShowDialog(false)
+    if (dialogContent.type === "success") {
+      onSuccess()
     }
   }
 
@@ -268,7 +338,7 @@ export default function ForgotPasswordForm() {
                       }
                       className="h-12 px-4 border-slate-200 hover:bg-slate-50 text-base bg-transparent whitespace-nowrap"
                     >
-                      {!canResend && resendTimer > 0
+                      {!verifiedPassCode && !canResend && resendTimer > 0
                         ? `${formatTimer(resendTimer)}`
                         : isCodeSent
                           ? "재발송"
@@ -292,17 +362,37 @@ export default function ForgotPasswordForm() {
                   >
                     인증코드
                   </Label>
-                  <div className="relative">
-                    <Shield className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                      id="verificationCode"
-                      type="text"
-                      placeholder="6자리 인증코드를 입력해주세요"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                      {...emailForm.register("verificationCode")}
-                    />
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Shield className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <Input
+                        id="verificationCode"
+                        type="text"
+                        placeholder="6자리 인증코드를 입력해주세요"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
+                        {...emailForm.register("verificationCode")}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={verifyCode}
+                      disabled={
+                        isLoading ||
+                        !verificationCode ||
+                        !email ||
+                        isCodeVerified
+                      }
+                      className="h-12 px-4 border-slate-200 hover:bg-slate-50 bg-transparent text-base whitespace-nowrap"
+                      variant={isCodeVerified ? "default" : "outline"}
+                    >
+                      {isCodeVerified
+                        ? "✓ 확인됨"
+                        : isLoading
+                          ? "확인 중..."
+                          : "인증 확인"}
+                    </Button>
                   </div>
                   {emailForm.formState.errors.verificationCode && (
                     <Alert className="py-2 border-red-200 bg-red-50">
@@ -313,15 +403,25 @@ export default function ForgotPasswordForm() {
                   )}
 
                   {/* 재발송 안내 메시지 */}
-                  {isCodeSent && !canResend && resendTimer > 0 && (
-                    <div className="text-sm text-slate-500 bg-slate-50 p-2 rounded-md">
-                      재발송은 {formatTimer(resendTimer)} 후에 가능합니다
-                    </div>
-                  )}
+                  {!verifiedPassCode &&
+                    isCodeSent &&
+                    !canResend &&
+                    resendTimer > 0 && (
+                      <div className="text-sm text-slate-500 bg-slate-50 p-2 rounded-md">
+                        재발송은 {formatTimer(resendTimer)} 후에 가능합니다
+                      </div>
+                    )}
 
                   {isCodeSent && canResend && (
                     <div className="text-sm text-green-600 bg-green-50 p-2 rounded-md">
                       인증코드를 재발송할 수 있습니다
+                    </div>
+                  )}
+
+                  {/* 인증 완료 메시지 */}
+                  {isCodeVerified && (
+                    <div className="text-sm text-green-600 bg-green-50 p-2 rounded-md">
+                      ✓ 이메일 인증이 완료되었습니다
                     </div>
                   )}
                 </div>
@@ -460,7 +560,7 @@ export default function ForgotPasswordForm() {
       </div>
 
       {/* Success/Info Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-2">

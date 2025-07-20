@@ -8,7 +8,7 @@ import {
   SaveControllerApi,
 } from "./__generated__"
 
-export const BACKEND_API = "http://3.34.159.207:8080"
+export const BACKEND_API = import.meta.env.DEV ? "" : "http://3.34.159.207:8080"
 
 const customFetch = async (url: string, init?: RequestInit) => {
   //   const loginInfo = getLoginInfo()

@@ -1,5 +1,7 @@
 import ForgotPasswordForm from "@/components/ForgotPasswordForm"
+import { useNavigate } from "react-router"
 
 export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />
+  const navigate = useNavigate()
+  return <ForgotPasswordForm onSuccess={() => navigate("/login")} />
 }
