@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
-import { getCurrentUserId } from "./useAuth"
+import { useAuth } from "./useAuth"
 import type { DocListResponse } from "@/api/__generated__"
 
 // API 응답을 프론트엔드 Document 타입으로 변환
@@ -25,10 +25,9 @@ function transformDocListResponse(apiDoc: DocListResponse) {
 
 export function useDocuments() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const userId = getCurrentUserId()
+  const { userId, isAuthenticated } = useAuth()
 
-  // React Query를 사용한 문서 목록 조회
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const {
     data: documents = [],
     isLoading,
@@ -37,13 +36,15 @@ export function useDocuments() {
   } = useQuery({
     queryKey: ["documents", userId],
     queryFn: async () => {
+      if (!userId) {
+        throw new Error("User not authenticated")
+      }
       const response = await apiClient.document.readList({ userId })
       return response.map(transformDocListResponse)
     },
-    enabled: !!userId, // userId가 있을 때만 쿼리 실행
+    enabled: isAuthenticated && !!userId, // 인증된 경우에만 실행
   })
 
-  // 검색 필터링 (메모화로 성능 최적화)
   const filteredDocuments = useMemo(() => {
     return documents.filter(
       (doc) =>
@@ -57,14 +58,16 @@ export function useDocuments() {
   }
 
   return {
+    // Raw data
     documents,
+    isLoading,
+    error,
+    refetch,
+    // Search functionality
     searchQuery,
     setSearchQuery,
     viewMode,
     toggleViewMode,
-    isLoading,
-    error,
     filteredDocuments,
-    refetch, // 데이터 새로고침을 위한 함수
   }
 }
