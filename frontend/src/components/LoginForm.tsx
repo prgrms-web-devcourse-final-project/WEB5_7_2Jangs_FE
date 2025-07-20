@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Eye, EyeOff, Mail, Lock, CheckCircle } from "lucide-react"
 import { useNavigate } from "react-router"
+import { apiClient } from "@/api/apiClient"
 
 const loginSchema = z.object({
   email: z.string().email("올바른 이메일 주소를 입력해주세요"),
@@ -59,25 +60,21 @@ export default function LoginForm({
     try {
       // 로그인 로직 구현
       console.log("로그인 데이터:", data)
-      await new Promise((resolve) => setTimeout(resolve, 1500)) // 시뮬레이션
-
-      // 로그인 실패 시뮬레이션 (실제로는 API 응답에 따라 처리)
-      if (
-        data.email === "test@example.com" &&
-        data.password === "wrongpassword"
-      ) {
-        setError("root", {
-          message: "이메일 또는 비밀번호가 올바르지 않습니다.",
-        })
-        return
-      }
+      await apiClient.user.login({
+        userLoginRequest: {
+          email: data.email,
+          password: data.password,
+        },
+      })
 
       setShowSuccessDialog(true)
       // 실제로는 리다이렉트 또는 상태 업데이트
     } catch (error) {
-      console.error("로그인 실패:", error)
       setError("root", {
-        message: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
       })
     } finally {
       setIsLoading(false)

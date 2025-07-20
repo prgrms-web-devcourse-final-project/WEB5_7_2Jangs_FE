@@ -11,18 +11,6 @@ import {
 export const BACKEND_API = import.meta.env.DEV ? "" : "http://3.34.159.207:8080"
 
 const customFetch = async (url: string, init?: RequestInit) => {
-  //   const loginInfo = getLoginInfo()
-
-  //   // 기존 헤더와 새로운 Authorization 헤더를 병합
-  //   const headers = {
-  //     ...(loginInfo?.token
-  //       ? {
-  //           Authorization: `Bearer ${loginInfo.token}`,
-  //         }
-  //       : {}),
-  //     ...init?.headers,
-  //   }
-
   // 새로운 init 객체 생성
   const newInit = {
     ...init,
