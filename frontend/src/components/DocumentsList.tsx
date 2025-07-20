@@ -55,7 +55,15 @@ export default function DocumentsList() {
 
   // AlertDialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [documentToDelete, setDocumentToDelete] = useState<number | null>(null)
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
+    null,
+  )
+
+  // Edit Title Dialog states
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [documentToEdit, setDocumentToEdit] = useState<Document | null>(null)
+  const [editTitle, setEditTitle] = useState("")
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const navigate = useNavigate()
 
@@ -85,15 +93,42 @@ export default function DocumentsList() {
 
   const handleEditTitle = (id: number) => {
     console.log(`문서 ${id} 제목 수정`)
-    // 실제로는 제목 수정 모달 또는 인라인 편집
-    const newTitle = prompt("새 제목을 입력하세요:")
-    if (newTitle?.trim()) {
+    const docToEdit = documents.find((doc) => doc.id === id)
+    if (docToEdit) {
+      setDocumentToEdit(docToEdit)
+      setEditTitle(docToEdit.title)
+      setShowEditDialog(true)
+    }
+  }
+
+  const confirmEditTitle = async () => {
+    if (!documentToEdit || !editTitle.trim()) return
+
+    setIsUpdating(true)
+    try {
+      // 제목 수정 시뮬레이션
+      await new Promise((resolve) => setTimeout(resolve, 500))
       setDocuments((docs) =>
         docs.map((doc) =>
-          doc.id === id ? { ...doc, title: newTitle.trim() } : doc,
+          doc.id === documentToEdit.id
+            ? { ...doc, title: editTitle.trim() }
+            : doc,
         ),
       )
+      setShowEditDialog(false)
+      setDocumentToEdit(null)
+      setEditTitle("")
+    } catch (error) {
+      console.error("제목 수정 실패:", error)
+    } finally {
+      setIsUpdating(false)
     }
+  }
+
+  const cancelEditTitle = () => {
+    setShowEditDialog(false)
+    setDocumentToEdit(null)
+    setEditTitle("")
   }
 
   const openCreateModal = () => {
@@ -109,13 +144,18 @@ export default function DocumentsList() {
 
   const handleDeleteDocument = (id: number) => {
     console.log(`문서 ${id} 삭제`)
-    setDocumentToDelete(id)
-    setShowDeleteDialog(true)
+    const docToDelete = documents.find((doc) => doc.id === id)
+    if (docToDelete) {
+      setDocumentToDelete(docToDelete)
+      setShowDeleteDialog(true)
+    }
   }
 
   const confirmDeleteDocument = () => {
     if (documentToDelete !== null) {
-      setDocuments((docs) => docs.filter((doc) => doc.id !== documentToDelete))
+      setDocuments((docs) =>
+        docs.filter((doc) => doc.id !== documentToDelete.id),
+      )
     }
     setShowDeleteDialog(false)
     setDocumentToDelete(null)
@@ -410,11 +450,13 @@ export default function DocumentsList() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-medium text-red-600">
-              <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
-              문서 삭제
+              <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />'
+              {documentToDelete?.title}'를 정말 삭제하시겠습니까?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base text-slate-600">
-              정말로 이 문서를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+              이 문서에 속한 모든 버전과 기록이 영구 삭제됩니다. 한 번 삭제한
+              <br />
+              문서는 복구할 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -428,11 +470,68 @@ export default function DocumentsList() {
               onClick={confirmDeleteDocument}
               className="bg-red-600 hover:bg-red-700 text-white text-base"
             >
-              삭제
+              영구 삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 문서 제목 수정 모달 */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-800">
+              문서 제목 수정
+            </DialogTitle>
+            <DialogDescription className="text-base text-slate-600">
+              문서의 제목을 수정해주세요.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label
+                htmlFor="edit-document-title"
+                className="text-base font-medium text-slate-700"
+              >
+                문서 제목
+              </Label>
+              <Input
+                id="edit-document-title"
+                type="text"
+                placeholder="문서 제목을 입력하세요"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="h-12 text-base border-slate-200 focus:border-slate-800 focus:ring-slate-800"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isUpdating && editTitle.trim()) {
+                    confirmEditTitle()
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={cancelEditTitle}
+              disabled={isUpdating}
+              className="text-base border-slate-200 hover:bg-slate-50 bg-transparent"
+            >
+              취소
+            </Button>
+            <Button
+              onClick={confirmEditTitle}
+              disabled={!editTitle.trim() || isUpdating}
+              className="bg-slate-800 hover:bg-slate-900 text-white text-base"
+            >
+              {isUpdating ? "수정 중..." : "문서 수정"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
