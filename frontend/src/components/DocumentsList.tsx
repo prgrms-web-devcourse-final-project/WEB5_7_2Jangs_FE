@@ -17,6 +17,7 @@ import {
   List,
   Edit,
   Trash2,
+  AlertTriangle,
 } from "lucide-react"
 import {
   Dialog,
@@ -26,6 +27,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog"
 import { Label } from "./ui/label"
 import { useNavigate } from "react-router"
 import Loading from "./Loading"
@@ -41,6 +52,10 @@ export default function DocumentsList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newDocumentTitle, setNewDocumentTitle] = useState("")
   const [isCreating, setIsCreating] = useState(false)
+
+  // AlertDialog states
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [documentToDelete, setDocumentToDelete] = useState<number | null>(null)
 
   const navigate = useNavigate()
 
@@ -94,10 +109,16 @@ export default function DocumentsList() {
 
   const handleDeleteDocument = (id: number) => {
     console.log(`문서 ${id} 삭제`)
-    // 실제로는 삭제 확인 모달
-    if (confirm("정말로 이 문서를 삭제하시겠습니까?")) {
-      setDocuments((docs) => docs.filter((doc) => doc.id !== id))
+    setDocumentToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteDocument = () => {
+    if (documentToDelete !== null) {
+      setDocuments((docs) => docs.filter((doc) => doc.id !== documentToDelete))
     }
+    setShowDeleteDialog(false)
+    setDocumentToDelete(null)
   }
 
   const createNewDocument = async () => {
@@ -383,6 +404,35 @@ export default function DocumentsList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 문서 삭제 확인 다이얼로그 */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-medium text-red-600">
+              <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
+              문서 삭제
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-slate-600">
+              정말로 이 문서를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setShowDeleteDialog(false)}
+              className="text-base border-slate-200 hover:bg-slate-50 bg-transparent"
+            >
+              취소
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteDocument}
+              className="bg-red-600 hover:bg-red-700 text-white text-base"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

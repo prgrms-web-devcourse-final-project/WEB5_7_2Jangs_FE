@@ -13,7 +13,23 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Mail, User, Lock, Shield } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  User,
+  Lock,
+  Shield,
+  CheckCircle,
+} from "lucide-react"
 
 const signupSchema = z
   .object({
@@ -49,6 +65,14 @@ export default function SignupForm({
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Dialog states
+  const [showDialog, setShowDialog] = useState(false)
+  const [dialogContent, setDialogContent] = useState({
+    title: "",
+    description: "",
+    type: "info" as "info" | "success",
+  })
+
   const {
     register,
     handleSubmit,
@@ -68,8 +92,12 @@ export default function SignupForm({
       // 회원가입 로직 구현
       console.log("회원가입 데이터:", data)
       await new Promise((resolve) => setTimeout(resolve, 2000)) // 시뮬레이션
-      alert("회원가입이 완료되었습니다!")
-      onSuccess()
+      setDialogContent({
+        title: "회원가입 완료",
+        description: "회원가입이 완료되었습니다!",
+        type: "success",
+      })
+      setShowDialog(true)
     } catch (error) {
       console.error("회원가입 실패:", error)
     } finally {
@@ -87,7 +115,12 @@ export default function SignupForm({
       console.log("인증코드 발송:", email)
       await new Promise((resolve) => setTimeout(resolve, 1000))
       setIsCodeSent(true)
-      alert("인증코드가 발송되었습니다!")
+      setDialogContent({
+        title: "인증코드 발송",
+        description: "인증코드가 발송되었습니다!",
+        type: "info",
+      })
+      setShowDialog(true)
     } catch (error) {
       console.error("인증코드 발송 실패:", error)
     } finally {
@@ -95,213 +128,246 @@ export default function SignupForm({
     }
   }
 
+  const handleDialogClose = () => {
+    setShowDialog(false)
+    if (dialogContent.type === "success") {
+      onSuccess()
+    }
+  }
+
   return (
-    <div className="h-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader className="space-y-1 text-center pb-8">
-          <CardTitle className="text-3xl font-bold text-slate-800">
-            회원가입
-          </CardTitle>
-          <CardDescription className="text-base text-slate-600">
-            새로운 계정을 만들어보세요
-          </CardDescription>
-        </CardHeader>
+    <>
+      <div className="h-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="space-y-1 text-center pb-8">
+            <CardTitle className="text-3xl font-bold text-slate-800">
+              회원가입
+            </CardTitle>
+            <CardDescription className="text-base text-slate-600">
+              새로운 계정을 만들어보세요
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* 이름 입력 */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="name"
-                className="text-base font-medium text-slate-700"
-              >
-                이름
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="이름을 입력해주세요"
-                  className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                  {...register("name")}
-                />
-              </div>
-              {errors.name && (
-                <Alert className="py-2 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-600 text-base">
-                    {errors.name.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            {/* 이메일 입력 */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="text-base font-medium text-slate-700"
-              >
-                이메일
-              </Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <CardContent className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* 이름 입력 */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="name"
+                  className="text-base font-medium text-slate-700"
+                >
+                  이름
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="이메일을 입력해주세요"
+                    id="name"
+                    type="text"
+                    placeholder="이름을 입력해주세요"
                     className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                    {...register("email")}
+                    {...register("name")}
                   />
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={sendVerificationCode}
-                  disabled={isLoading || !email || !!errors.email}
-                  className="h-12 px-4 border-slate-200 hover:bg-slate-50 bg-transparent text-base"
+                {errors.name && (
+                  <Alert className="py-2 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-600 text-base">
+                      {errors.name.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+
+              {/* 이메일 입력 */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-base font-medium text-slate-700"
                 >
-                  {isCodeSent ? "재발송" : "인증"}
-                </Button>
+                  이메일
+                </Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="이메일을 입력해주세요"
+                      className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
+                      {...register("email")}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={sendVerificationCode}
+                    disabled={isLoading || !email || !!errors.email}
+                    className="h-12 px-4 border-slate-200 hover:bg-slate-50 bg-transparent text-base"
+                  >
+                    {isCodeSent ? "재발송" : "인증"}
+                  </Button>
+                </div>
+                {errors.email && (
+                  <Alert className="py-2 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-600 text-base">
+                      {errors.email.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
-              {errors.email && (
-                <Alert className="py-2 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-600 text-base">
-                    {errors.email.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
 
-            {/* 인증코드 입력 */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="verificationCode"
-                className="text-base font-medium text-slate-700"
-              >
-                인증코드
-              </Label>
-              <div className="relative">
-                <Shield className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <Input
-                  id="verificationCode"
-                  type="text"
-                  placeholder="6자리 인증코드를 입력해주세요"
-                  maxLength={6}
-                  className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                  {...register("verificationCode")}
-                />
-              </div>
-              {errors.verificationCode && (
-                <Alert className="py-2 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-600 text-base">
-                    {errors.verificationCode.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            {/* 비밀번호 입력 */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-base font-medium text-slate-700"
-              >
-                비밀번호
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="비밀번호를 입력해주세요"
-                  className="pl-10 pr-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                  {...register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              {/* 인증코드 입력 */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="verificationCode"
+                  className="text-base font-medium text-slate-700"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
+                  인증코드
+                </Label>
+                <div className="relative">
+                  <Shield className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="verificationCode"
+                    type="text"
+                    placeholder="6자리 인증코드를 입력해주세요"
+                    maxLength={6}
+                    className="pl-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
+                    {...register("verificationCode")}
+                  />
+                </div>
+                {errors.verificationCode && (
+                  <Alert className="py-2 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-600 text-base">
+                      {errors.verificationCode.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
-              {errors.password && (
-                <Alert className="py-2 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-600 text-base">
-                    {errors.password.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
 
-            {/* 비밀번호 확인 */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="confirmPassword"
-                className="text-base font-medium text-slate-700"
-              >
-                비밀번호 확인
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="비밀번호를 다시 입력해주세요"
-                  className="pl-10 pr-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                  {...register("confirmPassword")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              {/* 비밀번호 입력 */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-base font-medium text-slate-700"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
+                  비밀번호
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="비밀번호를 입력해주세요"
+                    className="pl-10 pr-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <Alert className="py-2 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-600 text-base">
+                      {errors.password.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
-              {errors.confirmPassword && (
-                <Alert className="py-2 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-600 text-base">
-                    {errors.confirmPassword.message}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
 
-            {/* 회원가입 버튼 */}
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium mt-6 text-base"
-            >
-              {isLoading ? "처리중..." : "회원가입"}
+              {/* 비밀번호 확인 */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-base font-medium text-slate-700"
+                >
+                  비밀번호 확인
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="비밀번호를 다시 입력해주세요"
+                    className="pl-10 pr-10 h-12 border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
+                    {...register("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <Alert className="py-2 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-600 text-base">
+                      {errors.confirmPassword.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+
+              {/* 회원가입 버튼 */}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium mt-6 text-base"
+              >
+                {isLoading ? "처리중..." : "회원가입"}
+              </Button>
+            </form>
+
+            {/* 로그인 링크 */}
+            <div className="text-center pt-4 border-t border-slate-200">
+              <p className="text-base text-slate-600">
+                이미 계정이 있으신가요?{" "}
+                <a
+                  href="/login"
+                  className="text-blue-600 hover:text-blue-700 font-medium text-base"
+                >
+                  로그인
+                </a>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Success/Info Dialog */}
+      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <CheckCircle
+                className={`h-5 w-5 ${dialogContent.type === "success" ? "text-green-600" : "text-blue-600"}`}
+              />
+              <DialogTitle className="text-lg font-semibold">
+                {dialogContent.title}
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-base text-slate-600">
+              {dialogContent.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={handleDialogClose} className="w-full">
+              확인
             </Button>
-          </form>
-
-          {/* 로그인 링크 */}
-          <div className="text-center pt-4 border-t border-slate-200">
-            <p className="text-base text-slate-600">
-              이미 계정이 있으신가요?{" "}
-              <a
-                href="/login"
-                className="text-blue-600 hover:text-blue-700 font-medium text-base"
-              >
-                로그인
-              </a>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
