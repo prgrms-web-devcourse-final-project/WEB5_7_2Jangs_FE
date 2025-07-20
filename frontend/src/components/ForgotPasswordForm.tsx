@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -66,6 +66,10 @@ export default function ForgotPasswordForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
+  // 재발송 타이머 상태 (5분 = 300초)
+  const [resendTimer, setResendTimer] = useState(0)
+  const [canResend, setCanResend] = useState(true)
+
   // Dialog states
   const [showDialog, setShowDialog] = useState(false)
   const [dialogContent, setDialogContent] = useState({
@@ -88,16 +92,51 @@ export default function ForgotPasswordForm() {
 
   const email = emailForm.watch("email")
 
+  // 재발송 타이머 관리
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [resendTimer])
+
+  // 타이머 포맷팅 함수 (mm:ss 형식)
+  const formatTimer = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
   /* 인증코드 발송 */
   const sendVerificationCode = async () => {
     const isEmailValid = await emailForm.trigger("email")
-    if (!isEmailValid || !email) return
+    if (!isEmailValid || !email || !canResend) return
 
     setIsLoading(true)
     try {
       console.log("인증코드 발송:", email)
       await new Promise((r) => setTimeout(r, 1000))
+
+      // 성공 시 타이머 시작 (5분 = 300초)
       setIsCodeSent(true)
+      setCanResend(false)
+      setResendTimer(300)
+
       setDialogContent({
         title: "인증코드 발송",
         description: "인증코드가 발송되었습니다!",
@@ -224,11 +263,16 @@ export default function ForgotPasswordForm() {
                       disabled={
                         isLoading ||
                         !email ||
-                        !!emailForm.formState.errors.email
+                        !!emailForm.formState.errors.email ||
+                        !canResend
                       }
-                      className="h-12 px-4 border-slate-200 hover:bg-slate-50 text-base bg-transparent"
+                      className="h-12 px-4 border-slate-200 hover:bg-slate-50 text-base bg-transparent whitespace-nowrap"
                     >
-                      {isCodeSent ? "재발송" : "인증"}
+                      {!canResend && resendTimer > 0
+                        ? `${formatTimer(resendTimer)}`
+                        : isCodeSent
+                          ? "재발송"
+                          : "인증"}
                     </Button>
                   </div>
                   {emailForm.formState.errors.email && (
@@ -266,6 +310,19 @@ export default function ForgotPasswordForm() {
                         {emailForm.formState.errors.verificationCode.message}
                       </AlertDescription>
                     </Alert>
+                  )}
+
+                  {/* 재발송 안내 메시지 */}
+                  {isCodeSent && !canResend && resendTimer > 0 && (
+                    <div className="text-sm text-slate-500 bg-slate-50 p-2 rounded-md">
+                      재발송은 {formatTimer(resendTimer)} 후에 가능합니다
+                    </div>
+                  )}
+
+                  {isCodeSent && canResend && (
+                    <div className="text-sm text-green-600 bg-green-50 p-2 rounded-md">
+                      인증코드를 재발송할 수 있습니다
+                    </div>
                   )}
                 </div>
 

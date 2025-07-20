@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -65,6 +65,10 @@ export default function SignupForm({
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // 재발송 타이머 상태 (5분 = 300초)
+  const [resendTimer, setResendTimer] = useState(0)
+  const [canResend, setCanResend] = useState(true)
+
   // Dialog states
   const [showDialog, setShowDialog] = useState(false)
   const [dialogContent, setDialogContent] = useState({
@@ -85,6 +89,36 @@ export default function SignupForm({
   })
 
   const email = watch("email")
+
+  // 재발송 타이머 관리
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [resendTimer])
+
+  // 타이머 포맷팅 함수 (mm:ss 형식)
+  const formatTimer = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true)
@@ -107,14 +141,19 @@ export default function SignupForm({
 
   const sendVerificationCode = async () => {
     const isEmailValid = await trigger("email")
-    if (!isEmailValid || !email) return
+    if (!isEmailValid || !email || !canResend) return
 
     setIsLoading(true)
     try {
       // 인증코드 발송 로직
       console.log("인증코드 발송:", email)
       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // 성공 시 타이머 시작 (5분 = 300초)
       setIsCodeSent(true)
+      setCanResend(false)
+      setResendTimer(300)
+
       setDialogContent({
         title: "인증코드 발송",
         description: "인증코드가 발송되었습니다!",
@@ -200,10 +239,16 @@ export default function SignupForm({
                     type="button"
                     variant="outline"
                     onClick={sendVerificationCode}
-                    disabled={isLoading || !email || !!errors.email}
-                    className="h-12 px-4 border-slate-200 hover:bg-slate-50 bg-transparent text-base"
+                    disabled={
+                      isLoading || !email || !!errors.email || !canResend
+                    }
+                    className="h-12 px-4 border-slate-200 hover:bg-slate-50 bg-transparent text-base whitespace-nowrap"
                   >
-                    {isCodeSent ? "재발송" : "인증"}
+                    {!canResend && resendTimer > 0
+                      ? `${formatTimer(resendTimer)}`
+                      : isCodeSent
+                        ? "재발송"
+                        : "인증"}
                   </Button>
                 </div>
                 {errors.email && (
@@ -240,6 +285,19 @@ export default function SignupForm({
                       {errors.verificationCode.message}
                     </AlertDescription>
                   </Alert>
+                )}
+
+                {/* 재발송 안내 메시지 */}
+                {isCodeSent && !canResend && resendTimer > 0 && (
+                  <div className="text-sm text-slate-500 bg-slate-50 p-2 rounded-md">
+                    재발송은 {formatTimer(resendTimer)} 후에 가능합니다
+                  </div>
+                )}
+
+                {isCodeSent && canResend && (
+                  <div className="text-sm text-green-600 bg-green-50 p-2 rounded-md">
+                    인증코드를 재발송할 수 있습니다
+                  </div>
                 )}
               </div>
 
