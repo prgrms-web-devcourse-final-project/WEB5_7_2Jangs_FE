@@ -21,6 +21,7 @@ import DocumentContent, {
 } from "@/components/DocumentContent"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
+import { GraphData } from "@/mock/GraphData"
 
 export type Mode = "commit" | "compare" | "save"
 
@@ -264,22 +265,22 @@ export default function DocumentDetailPage() {
     return <Loading text="문서를 불러오는 중..." />
   }
 
-  if (graphError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
-            오류가 발생했습니다
-          </h2>
-          <p className="text-gray-600">문서를 불러올 수 없습니다.</p>
-        </div>
-      </div>
-    )
-  }
+  // if (graphError) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen">
+  //       <div className="text-center">
+  //         <h2 className="text-xl font-semibold text-red-600 mb-2">
+  //           오류가 발생했습니다
+  //         </h2>
+  //         <p className="text-gray-600">문서를 불러올 수 없습니다.</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
-  if (!graphData) {
-    return <Loading text="문서를 불러오는 중..." />
-  }
+  // if (!graphData) {
+  //   return <Loading text="문서를 불러오는 중..." />
+  // }
 
   if (isContentLoading) {
     return <Loading text="문서 내용을 불러오는 중..." />
@@ -292,7 +293,7 @@ export default function DocumentDetailPage() {
         <div className="p-4 h-[calc(100%-48px)] box-sizing: border-box;">
           <div className="flex justify-between items-center z-10 w-full bg-gray-300 rounded-t-md p-2">
             <button className="cursor-pointer">
-              <h2 className="text-2xl font-bold">{graphData.title}</h2>
+              <h2 className="text-2xl font-bold">{GraphData.title}</h2>
             </button>
             <button
               className="cursor-pointer hover:bg-gray-400 p-1 rounded"
@@ -303,7 +304,7 @@ export default function DocumentDetailPage() {
           </div>
 
           <DocumentGraph
-            data={graphData}
+            data={GraphData}
             currentCommitId={commitId}
             currentTempId={tempId}
             onNodeMenuClick={handleNodeMenuClick}
