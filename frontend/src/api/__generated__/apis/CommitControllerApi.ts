@@ -19,6 +19,7 @@ import type {
   CompareMergeCommitResponse,
   CreateCommitRequest,
   CreateCommitResponse,
+  MergeCommitRequest,
 } from '../models/index';
 import {
     CommitResponseFromJSON,
@@ -29,6 +30,8 @@ import {
     CreateCommitRequestToJSON,
     CreateCommitResponseFromJSON,
     CreateCommitResponseToJSON,
+    MergeCommitRequestFromJSON,
+    MergeCommitRequestToJSON,
 } from '../models/index';
 
 export interface CompareMergeCommitRequest {
@@ -45,6 +48,11 @@ export interface CreateCommitOperationRequest {
 export interface GetCommitRequest {
     docId: number;
     commitId: number;
+}
+
+export interface MergeCommitOperationRequest {
+    docId: number;
+    mergeCommitRequest: MergeCommitRequest;
 }
 
 /**
@@ -194,6 +202,51 @@ export class CommitControllerApi extends runtime.BaseAPI {
      */
     async getCommit(requestParameters: GetCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CommitResponse> {
         const response = await this.getCommitRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async mergeCommitRaw(requestParameters: MergeCommitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateCommitResponse>> {
+        if (requestParameters['docId'] == null) {
+            throw new runtime.RequiredError(
+                'docId',
+                'Required parameter "docId" was null or undefined when calling mergeCommit().'
+            );
+        }
+
+        if (requestParameters['mergeCommitRequest'] == null) {
+            throw new runtime.RequiredError(
+                'mergeCommitRequest',
+                'Required parameter "mergeCommitRequest" was null or undefined when calling mergeCommit().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/document/{docId}/merge`;
+        urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: MergeCommitRequestToJSON(requestParameters['mergeCommitRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateCommitResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async mergeCommit(requestParameters: MergeCommitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateCommitResponse> {
+        const response = await this.mergeCommitRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

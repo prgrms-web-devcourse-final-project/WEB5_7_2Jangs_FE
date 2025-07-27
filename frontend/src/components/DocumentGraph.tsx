@@ -10,7 +10,7 @@ import type { GraphDataType } from "@/types/graph"
 export interface DocumentGraphProps {
   data: GraphDataType
   currentCommitId: string | null
-  currentTempId: string | null
+  currentSaveId: string | null
   onNodeMenuClick: (
     type: CommitNodeMenuType | TempNodeMenuType,
     commitId: number,
@@ -21,7 +21,7 @@ export interface DocumentGraphProps {
 export default function DocumentGraph({
   data,
   currentCommitId,
-  currentTempId,
+  currentSaveId,
   onNodeMenuClick,
   onBranchDelete,
 }: DocumentGraphProps) {
@@ -31,8 +31,8 @@ export default function DocumentGraph({
   const mainBranch = data.branches.find((b) => b.name === "main")
   const activeCommitId =
     currentCommitId ??
-    (currentTempId ? null : mainBranch?.leafCommitId?.toString())
-  const activeTempId = currentTempId
+    (currentSaveId ? null : mainBranch?.leafCommitId?.toString())
+  const activeSaveId = currentSaveId
 
   const isMainBranchLeafCommit =
     mainBranch?.leafCommitId.toString() === activeCommitId
@@ -45,11 +45,11 @@ export default function DocumentGraph({
       )
       return commit?.branchId
     }
-    if (currentTempId) {
-      const tempBranch = data.branches.find(
-        (b) => b.tempId?.toString() === currentTempId,
+    if (currentSaveId) {
+      const saveBranch = data.branches.find(
+        (b) => b.saveId?.toString() === currentSaveId,
       )
-      return tempBranch?.id
+      return saveBranch?.id
     }
     return mainBranch?.id
   }
@@ -64,7 +64,7 @@ export default function DocumentGraph({
   const { nodes: rawNodes, edges } = useGraphRender({
     data,
     activeCommitId,
-    activeTempId,
+    activeSaveId,
     isMainBranchLeafCommit,
   })
 

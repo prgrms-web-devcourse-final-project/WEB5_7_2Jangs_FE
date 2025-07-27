@@ -32,16 +32,16 @@ export default function DocumentsList() {
 
   const editDocument = useEditDocument({ documents })
 
-  const deleteDocument = useDeleteDocument({ documents })
+  const deleteDocument = useDeleteDocument()
 
   // 문서 클릭 핸들러
   const handleDocumentClick = (doc: Document) => {
     console.log(`문서 ${doc.id} 열기`)
     const { recentType, recentTypeId } = doc.recent
     if (recentType === "SAVE") {
-      navigate(`/documents/${doc.id}?mode=save&tempId=${recentTypeId}`)
+      navigate(`/documents/${doc.id}?mode=save&saveId=${recentTypeId}`)
     } else if (recentType === "COMMIT") {
-      navigate(`/documents/${doc.id}?mode=commit&tempId=${recentTypeId}`)
+      navigate(`/documents/${doc.id}?mode=commit&saveId=${recentTypeId}`)
     }
   }
 
@@ -69,7 +69,7 @@ export default function DocumentsList() {
           searchQuery={searchQuery}
           onDocumentClick={handleDocumentClick}
           onEditTitle={editDocument.handleEditTitle}
-          onDeleteDocument={deleteDocument.handleDeleteDocument}
+          onDeleteDocument={deleteDocument.deleteDocument}
         />
       </main>
 

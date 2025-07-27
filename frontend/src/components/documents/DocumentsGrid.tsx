@@ -8,7 +8,7 @@ interface DocumentsGridProps {
   searchQuery: string
   onDocumentClick: (doc: Document) => void
   onEditTitle: (id: number) => void
-  onDeleteDocument: (id: number) => void
+  onDeleteDocument: (doc: Document) => void
 }
 
 export default function DocumentsGrid({

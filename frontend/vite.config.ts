@@ -14,8 +14,9 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://3.34.159.207:8080",
+        target: "https://docsa.kro.kr",
         changeOrigin: true,
+        secure: true,
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('🔄 Proxy request:', req.method, req.url, '-> ', proxyReq.path);
@@ -29,12 +30,27 @@ export default defineConfig({
             proxyReq.removeHeader('sec-ch-ua-platform');
             
             // Origin 헤더를 서버 주소로 변경
-            proxyReq.setHeader('origin', 'http://3.34.159.207:8080');
+            proxyReq.setHeader('origin', 'https://docsa.kro.kr');
             proxyReq.removeHeader('referer');
           });
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('📥 Proxy response:', proxyRes.statusCode, req.url);
             console.log('📥 Proxy response:', proxyRes);
+
+            // Set-Cookie 헤더 수정
+            const setCookieHeaders = proxyRes.headers['set-cookie'];
+            if (setCookieHeaders) {
+              proxyRes.headers['set-cookie'] = setCookieHeaders.map(cookie => {
+                // Domain을 localhost로 변경하고 중복 제거
+                return cookie
+                  .replace(/Domain=\.?docsa\.kro\.kr/gi, 'Domain=localhost')
+                  .replace(/;\s*Domain=localhost;\s*Domain=localhost/gi, '; Domain=localhost') // 중복 제거
+                  .replace(/;\s*Secure/gi, '') // 개발 환경에서는 Secure 제거
+                  .replace(/;\s*SameSite=None/gi, '; SameSite=Lax'); // SameSite 변경
+              });
+
+              console.log('🍪 Modified cookies:', proxyRes.headers['set-cookie']);
+            }
           });
           proxy.on('error', (err, req, res) => {
             console.log('❌ Proxy error:', err.message);

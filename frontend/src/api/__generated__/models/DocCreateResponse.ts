@@ -25,6 +25,12 @@ export interface DocCreateResponse {
      * @memberof DocCreateResponse
      */
     id?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocCreateResponse
+     */
+    saveId?: number;
 }
 
 /**
@@ -45,6 +51,7 @@ export function DocCreateResponseFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'saveId': json['saveId'] == null ? undefined : json['saveId'],
     };
 }
 
@@ -60,6 +67,7 @@ export function DocCreateResponseToJSONTyped(value?: DocCreateResponse | null, i
     return {
         
         'id': value['id'],
+        'saveId': value['saveId'],
     };
 }
 

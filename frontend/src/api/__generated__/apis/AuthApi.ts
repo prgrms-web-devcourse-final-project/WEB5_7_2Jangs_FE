@@ -19,6 +19,7 @@ import type {
   CodeCheckResponse,
   ErrorResponse,
   PwdResetCodeRequest,
+  SessionCheckResponse,
   SignupCodeRequest,
 } from '../models/index';
 import {
@@ -30,6 +31,8 @@ import {
     ErrorResponseToJSON,
     PwdResetCodeRequestFromJSON,
     PwdResetCodeRequestToJSON,
+    SessionCheckResponseFromJSON,
+    SessionCheckResponseToJSON,
     SignupCodeRequestFromJSON,
     SignupCodeRequestToJSON,
 } from '../models/index';
@@ -52,7 +55,7 @@ export interface SendSignupCodeRequest {
 export class AuthApi extends runtime.BaseAPI {
 
     /**
-     * 입력한 이메일, 인증코드, 코드 타입을 통해 유효성을 검증합니다.
+     * 이메일, 인증코드, 코드 타입(SIGNUP / RESET_PASSWORD)을 입력받아 인증코드의 유효성을 검증합니다. 인증코드는 일정 시간 동안만 유효합니다. 잘못된 코드, 만료된 코드, 시스템 에러 발생 시 각기 다른 응답이 반환됩니다. 
      * 인증코드 검증
      */
     async checkCodeRaw(requestParameters: CheckCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CodeCheckResponse>> {
@@ -84,7 +87,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 입력한 이메일, 인증코드, 코드 타입을 통해 유효성을 검증합니다.
+     * 이메일, 인증코드, 코드 타입(SIGNUP / RESET_PASSWORD)을 입력받아 인증코드의 유효성을 검증합니다. 인증코드는 일정 시간 동안만 유효합니다. 잘못된 코드, 만료된 코드, 시스템 에러 발생 시 각기 다른 응답이 반환됩니다. 
      * 인증코드 검증
      */
     async checkCode(requestParameters: CheckCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CodeCheckResponse> {
@@ -93,7 +96,38 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 입력한 이메일 주소로 비밀번호 변경용 인증코드를 전송합니다.
+     * 현재 로그인된 사용자의 세션이 유효한지 확인하고 사용자 정보를 반환합니다.
+     * 세션 유효성 확인
+     */
+    async checkSessionRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionCheckResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/auth/session/check`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SessionCheckResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 현재 로그인된 사용자의 세션이 유효한지 확인하고 사용자 정보를 반환합니다.
+     * 세션 유효성 확인
+     */
+    async checkSession(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionCheckResponse> {
+        const response = await this.checkSessionRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 
      * 비밀번호 변경 인증코드 전송
      */
     async sendResetPwdCodeRaw(requestParameters: SendResetPwdCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -125,7 +159,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 입력한 이메일 주소로 비밀번호 변경용 인증코드를 전송합니다.
+     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 
      * 비밀번호 변경 인증코드 전송
      */
     async sendResetPwdCode(requestParameters: SendResetPwdCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -133,7 +167,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 입력한 이메일 주소로 회원가입용 인증코드를 전송합니다.
+     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 
      * 회원가입 인증코드 전송
      */
     async sendSignupCodeRaw(requestParameters: SendSignupCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -165,7 +199,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 입력한 이메일 주소로 회원가입용 인증코드를 전송합니다.
+     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 
      * 회원가입 인증코드 전송
      */
     async sendSignupCode(requestParameters: SendSignupCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {

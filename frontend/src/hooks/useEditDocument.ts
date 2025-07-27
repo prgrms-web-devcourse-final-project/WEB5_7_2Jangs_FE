@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
-import { getCurrentUserId } from "./useAuth"
 import type { Document } from "@/mock/DocumentList"
 
 interface UseEditDocumentProps {
@@ -13,21 +12,19 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
   const [documentToEdit, setDocumentToEdit] = useState<Document | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const queryClient = useQueryClient()
-  const userId = getCurrentUserId()
 
   // React Query Mutation을 사용한 문서 제목 수정
   const editTitleMutation = useMutation({
     mutationFn: async ({ docId, title }: { docId: number; title: string }) => {
       return await apiClient.document.updateDocumentTitle({
         docId,
-        userId,
         docTitleRequest: { title },
       })
     },
     onSuccess: (response, variables) => {
       // 성공 시 문서 목록 캐시 업데이트
       queryClient.setQueryData(
-        ["documents", userId],
+        ["documents"],
         (oldData: Document[] | undefined) => {
           if (!oldData) return oldData
           return oldData.map((doc) =>

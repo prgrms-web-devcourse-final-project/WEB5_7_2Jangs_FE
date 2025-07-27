@@ -13,27 +13,27 @@
  */
 
 import { mapValues } from '../runtime';
-import type { BranchDto } from './BranchDto';
+import type { GraphBranchDto } from './GraphBranchDto';
 import {
-    BranchDtoFromJSON,
-    BranchDtoFromJSONTyped,
-    BranchDtoToJSON,
-    BranchDtoToJSONTyped,
-} from './BranchDto';
-import type { CommitDto } from './CommitDto';
+    GraphBranchDtoFromJSON,
+    GraphBranchDtoFromJSONTyped,
+    GraphBranchDtoToJSON,
+    GraphBranchDtoToJSONTyped,
+} from './GraphBranchDto';
+import type { GraphCommitDto } from './GraphCommitDto';
 import {
-    CommitDtoFromJSON,
-    CommitDtoFromJSONTyped,
-    CommitDtoToJSON,
-    CommitDtoToJSONTyped,
-} from './CommitDto';
-import type { EdgeDto } from './EdgeDto';
+    GraphCommitDtoFromJSON,
+    GraphCommitDtoFromJSONTyped,
+    GraphCommitDtoToJSON,
+    GraphCommitDtoToJSONTyped,
+} from './GraphCommitDto';
+import type { GraphEdgeDto } from './GraphEdgeDto';
 import {
-    EdgeDtoFromJSON,
-    EdgeDtoFromJSONTyped,
-    EdgeDtoToJSON,
-    EdgeDtoToJSONTyped,
-} from './EdgeDto';
+    GraphEdgeDtoFromJSON,
+    GraphEdgeDtoFromJSONTyped,
+    GraphEdgeDtoToJSON,
+    GraphEdgeDtoToJSONTyped,
+} from './GraphEdgeDto';
 
 /**
  * 
@@ -49,22 +49,22 @@ export interface CommitGraphResponse {
     title?: string;
     /**
      * 
-     * @type {Array<CommitDto>}
+     * @type {Array<GraphCommitDto>}
      * @memberof CommitGraphResponse
      */
-    commits?: Array<CommitDto>;
+    commits?: Array<GraphCommitDto>;
     /**
      * 
-     * @type {Array<EdgeDto>}
+     * @type {Array<GraphEdgeDto>}
      * @memberof CommitGraphResponse
      */
-    edges?: Array<EdgeDto>;
+    edges?: Array<GraphEdgeDto>;
     /**
      * 
-     * @type {Array<BranchDto>}
+     * @type {Array<GraphBranchDto>}
      * @memberof CommitGraphResponse
      */
-    branches?: Array<BranchDto>;
+    branches?: Array<GraphBranchDto>;
 }
 
 /**
@@ -85,9 +85,9 @@ export function CommitGraphResponseFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'title': json['title'] == null ? undefined : json['title'],
-        'commits': json['commits'] == null ? undefined : ((json['commits'] as Array<any>).map(CommitDtoFromJSON)),
-        'edges': json['edges'] == null ? undefined : ((json['edges'] as Array<any>).map(EdgeDtoFromJSON)),
-        'branches': json['branches'] == null ? undefined : ((json['branches'] as Array<any>).map(BranchDtoFromJSON)),
+        'commits': json['commits'] == null ? undefined : ((json['commits'] as Array<any>).map(GraphCommitDtoFromJSON)),
+        'edges': json['edges'] == null ? undefined : ((json['edges'] as Array<any>).map(GraphEdgeDtoFromJSON)),
+        'branches': json['branches'] == null ? undefined : ((json['branches'] as Array<any>).map(GraphBranchDtoFromJSON)),
     };
 }
 
@@ -103,9 +103,9 @@ export function CommitGraphResponseToJSONTyped(value?: CommitGraphResponse | nul
     return {
         
         'title': value['title'],
-        'commits': value['commits'] == null ? undefined : ((value['commits'] as Array<any>).map(CommitDtoToJSON)),
-        'edges': value['edges'] == null ? undefined : ((value['edges'] as Array<any>).map(EdgeDtoToJSON)),
-        'branches': value['branches'] == null ? undefined : ((value['branches'] as Array<any>).map(BranchDtoToJSON)),
+        'commits': value['commits'] == null ? undefined : ((value['commits'] as Array<any>).map(GraphCommitDtoToJSON)),
+        'edges': value['edges'] == null ? undefined : ((value['edges'] as Array<any>).map(GraphEdgeDtoToJSON)),
+        'branches': value['branches'] == null ? undefined : ((value['branches'] as Array<any>).map(GraphBranchDtoToJSON)),
     };
 }
 

@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 회원가입용 인증코드 요청 DTO
+ * 회원가입용 인증코드 요청
  * @export
  * @interface SignupCodeRequest
  */

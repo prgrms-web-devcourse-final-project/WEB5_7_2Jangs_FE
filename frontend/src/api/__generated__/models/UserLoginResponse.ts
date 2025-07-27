@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 로그인 응답 DTO
+ * 로그인 응답
  * @export
  * @interface UserLoginResponse
  */

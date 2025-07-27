@@ -1,116 +1,91 @@
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+  type ReactNode,
+} from "react"
 import { apiClient } from "@/api/apiClient"
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
-import { useEffect } from "react"
+import type { SessionCheckResponse } from "@/api/__generated__"
 
-// 인증 상태 인터페이스
-interface AuthState {
-  userId: number | null
+interface User {
+  id: number
+  name: string
+}
+
+interface AuthContextType {
+  user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-
-  // 액션들
-  login: (id: number) => void
-  logout: () => Promise<void>
-  setLoading: (loading: boolean) => void
-  validateSession: () => Promise<void>
+  checkSession: () => Promise<void>
+  logout: () => void
 }
 
-// zustand store 생성 (persist 미들웨어 사용)
-const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      userId: null,
-      isAuthenticated: false,
-      isLoading: true,
+const AuthContext = createContext<AuthContextType | null>(null)
 
-      login: (id: number) => {
-        console.log("User logged in:", id)
-        set({
-          userId: id,
-          isAuthenticated: true,
-          isLoading: false,
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const checkSession = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response: SessionCheckResponse = await apiClient.auth.checkSession()
+
+      if (response.id && response.name) {
+        setUser({
+          id: response.id,
+          name: response.name,
         })
-      },
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error("세션 체크 실패:", error)
+      setUser(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-      logout: async () => {
-        const { setLoading } = get()
-        setLoading(true)
+  const logout = useCallback(() => {
+    setUser(null)
+    // 쿠키나 로컬 스토리지 정리 (필요시)
+    // document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+  }, [])
 
-        try {
-          await apiClient.user.logout()
-          console.log("로그아웃 성공")
-        } catch (error) {
-          console.error("로그아웃 실패:", error)
-        } finally {
-          set({
-            userId: null,
-            isAuthenticated: false,
-            isLoading: false,
-          })
-        }
-      },
-
-      setLoading: (loading: boolean) => {
-        set({ isLoading: loading })
-      },
-
-      // 세션 유효성 검증
-      validateSession: async () => {
-        const { userId, setLoading } = get()
-
-        if (!userId) {
-          setLoading(false)
-          return
-        }
-
-        try {
-          // 사용자의 문서 목록을 가져와서 세션이 유효한지 확인
-          await apiClient.document.readList({ userId })
-          console.log("Session is valid for user:", userId)
-          set({ isAuthenticated: true, isLoading: false })
-        } catch (error) {
-          console.warn("Session validation failed:", error)
-          // 세션이 무효하면 로그아웃 처리
-          set({
-            userId: null,
-            isAuthenticated: false,
-            isLoading: false,
-          })
-        }
-      },
-    }),
-    {
-      name: "auth-storage", // localStorage 키 이름
-      partialize: (state) => ({
-        userId: state.userId,
-        isAuthenticated: state.isAuthenticated,
-      }), // 저장할 상태만 선택 (isLoading은 제외)
-    },
-  ),
-)
-
-// 컴포넌트에서 사용할 훅
-export function useAuth() {
-  const store = useAuthStore()
-
-  // 초기 로딩 시 세션 검증
-  const { userId, isAuthenticated, validateSession, setLoading } = store
-
-  // 마운트 시 세션 검증 (한 번만 실행)
+  // 앱 시작 시 세션 체크
   useEffect(() => {
-    console.log("useAuth useEffect - validating session")
-    validateSession()
-  }, [validateSession])
+    checkSession()
+  }, [checkSession])
 
-  return store
+  const value: AuthContextType = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    checkSession,
+    logout,
+  }
+
+  return React.createElement(AuthContext.Provider, { value }, children)
 }
 
-// 호환성을 위한 getCurrentUserId 함수
-export function getCurrentUserId(): number {
-  const { userId } = useAuthStore.getState()
-  if (!userId) {
-    throw new Error("User not authenticated")
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error("useAuth는 AuthProvider 내부에서 사용되어야 합니다")
   }
-  return userId
+  return context
+}
+
+// 레거시 함수 (기존 코드와의 호환성을 위해 유지)
+export const validateSession = async () => {
+  const res = await apiClient.auth.checkSession()
+  console.log("validateSession", res)
+  return res
 }

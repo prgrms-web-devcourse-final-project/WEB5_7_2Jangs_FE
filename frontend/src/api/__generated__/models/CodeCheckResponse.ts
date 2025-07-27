@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 인증코드 검증 응답 DTO
+ * 인증코드 검증 응답
  * @export
  * @interface CodeCheckResponse
  */

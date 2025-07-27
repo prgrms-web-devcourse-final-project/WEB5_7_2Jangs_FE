@@ -2,33 +2,33 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
-import { getCurrentUserId } from "./useAuth"
 
 export function useCreateDocument() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newDocumentTitle, setNewDocumentTitle] = useState("")
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const userId = getCurrentUserId()
 
   // React Query Mutation을 사용한 문서 생성
   const createDocumentMutation = useMutation({
     mutationFn: async (title: string) => {
       return await apiClient.document.create({
-        userId,
         docTitleRequest: { title },
       })
     },
     onSuccess: (response) => {
       // 성공 시 문서 목록 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: ["documents", userId] })
+      queryClient.invalidateQueries({ queryKey: ["documents"] })
 
       // 모달 닫기
       closeCreateModal()
 
       // 새 문서로 이동 (임시 저장 모드로)
-      const newDocumentId = response.id || 0
-      navigate(`/documents/${newDocumentId}?mode=save&tempId=0`)
+      const newDocumentId = response.id
+
+      navigate(
+        `/documents/${newDocumentId}?mode=save&saveId=${response.saveId}`,
+      )
 
       console.log("새 문서 생성됨:", response)
     },

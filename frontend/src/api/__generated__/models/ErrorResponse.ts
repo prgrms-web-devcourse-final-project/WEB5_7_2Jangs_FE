@@ -13,28 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProblemDetail } from './ProblemDetail';
-import {
-    ProblemDetailFromJSON,
-    ProblemDetailFromJSONTyped,
-    ProblemDetailToJSON,
-    ProblemDetailToJSONTyped,
-} from './ProblemDetail';
-import type { ErrorResponseStatusCode } from './ErrorResponseStatusCode';
-import {
-    ErrorResponseStatusCodeFromJSON,
-    ErrorResponseStatusCodeFromJSONTyped,
-    ErrorResponseStatusCodeToJSON,
-    ErrorResponseStatusCodeToJSONTyped,
-} from './ErrorResponseStatusCode';
-import type { ErrorResponseHeaders } from './ErrorResponseHeaders';
-import {
-    ErrorResponseHeadersFromJSON,
-    ErrorResponseHeadersFromJSONTyped,
-    ErrorResponseHeadersToJSON,
-    ErrorResponseHeadersToJSONTyped,
-} from './ErrorResponseHeaders';
-
 /**
  * 
  * @export
@@ -43,46 +21,22 @@ import {
 export interface ErrorResponse {
     /**
      * 
-     * @type {ProblemDetail}
+     * @type {number}
      * @memberof ErrorResponse
      */
-    body?: ProblemDetail;
-    /**
-     * 
-     * @type {ErrorResponseStatusCode}
-     * @memberof ErrorResponse
-     */
-    statusCode?: ErrorResponseStatusCode;
-    /**
-     * 
-     * @type {Array<any>}
-     * @memberof ErrorResponse
-     */
-    detailMessageArguments?: Array<any>;
+    status?: number;
     /**
      * 
      * @type {string}
      * @memberof ErrorResponse
      */
-    typeMessageCode?: string;
+    message?: string;
     /**
      * 
      * @type {string}
      * @memberof ErrorResponse
      */
-    detailMessageCode?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
-    titleMessageCode?: string;
-    /**
-     * 
-     * @type {ErrorResponseHeaders}
-     * @memberof ErrorResponse
-     */
-    headers?: ErrorResponseHeaders;
+    error?: string;
 }
 
 /**
@@ -102,13 +56,9 @@ export function ErrorResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
-        'body': json['body'] == null ? undefined : ProblemDetailFromJSON(json['body']),
-        'statusCode': json['statusCode'] == null ? undefined : ErrorResponseStatusCodeFromJSON(json['statusCode']),
-        'detailMessageArguments': json['detailMessageArguments'] == null ? undefined : json['detailMessageArguments'],
-        'typeMessageCode': json['typeMessageCode'] == null ? undefined : json['typeMessageCode'],
-        'detailMessageCode': json['detailMessageCode'] == null ? undefined : json['detailMessageCode'],
-        'titleMessageCode': json['titleMessageCode'] == null ? undefined : json['titleMessageCode'],
-        'headers': json['headers'] == null ? undefined : ErrorResponseHeadersFromJSON(json['headers']),
+        'status': json['status'] == null ? undefined : json['status'],
+        'message': json['message'] == null ? undefined : json['message'],
+        'error': json['error'] == null ? undefined : json['error'],
     };
 }
 
@@ -123,13 +73,9 @@ export function ErrorResponseToJSONTyped(value?: ErrorResponse | null, ignoreDis
 
     return {
         
-        'body': ProblemDetailToJSON(value['body']),
-        'statusCode': ErrorResponseStatusCodeToJSON(value['statusCode']),
-        'detailMessageArguments': value['detailMessageArguments'],
-        'typeMessageCode': value['typeMessageCode'],
-        'detailMessageCode': value['detailMessageCode'],
-        'titleMessageCode': value['titleMessageCode'],
-        'headers': ErrorResponseHeadersToJSON(value['headers']),
+        'status': value['status'],
+        'message': value['message'],
+        'error': value['error'],
     };
 }
 

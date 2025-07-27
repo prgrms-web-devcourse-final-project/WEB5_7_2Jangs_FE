@@ -17,47 +17,55 @@ import * as runtime from '../runtime';
 import type {
   CommitGraphResponse,
   DocCreateResponse,
-  DocListResponse,
-  DocListSimpleResponse,
   DocTitleRequest,
   DocTitleUpdateResponse,
+  PageDocListResponse,
+  PageDocListSimpleResponse,
 } from '../models/index';
 import {
     CommitGraphResponseFromJSON,
     CommitGraphResponseToJSON,
     DocCreateResponseFromJSON,
     DocCreateResponseToJSON,
-    DocListResponseFromJSON,
-    DocListResponseToJSON,
-    DocListSimpleResponseFromJSON,
-    DocListSimpleResponseToJSON,
     DocTitleRequestFromJSON,
     DocTitleRequestToJSON,
     DocTitleUpdateResponseFromJSON,
     DocTitleUpdateResponseToJSON,
+    PageDocListResponseFromJSON,
+    PageDocListResponseToJSON,
+    PageDocListSimpleResponseFromJSON,
+    PageDocListSimpleResponseToJSON,
 } from '../models/index';
 
-export interface CreateRequest {
+export interface DeleteRequest {
+    docId: number;
     userId: number;
+}
+
+export interface CreateRequest {
     docTitleRequest: DocTitleRequest;
 }
 
 export interface GetGraphRequest {
-    userId: number;
     docId: number;
 }
 
 export interface ReadListRequest {
-    userId: number;
+    sort?: string;
+    order?: string;
+    page?: number;
+    size?: number;
 }
 
 export interface ReadListSidebarRequest {
-    userId: number;
+    sort?: string;
+    order?: string;
+    page?: number;
+    size?: number;
 }
 
 export interface UpdateDocumentTitleRequest {
     docId: number;
-    userId: number;
     docTitleRequest: DocTitleRequest;
 }
 
@@ -68,18 +76,18 @@ export class DocControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async createRaw(requestParameters: CreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocCreateResponse>> {
-        if (requestParameters['userId'] == null) {
+    async _deleteRaw(requestParameters: DeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
-                'userId',
-                'Required parameter "userId" was null or undefined when calling create().'
+                'docId',
+                'Required parameter "docId" was null or undefined when calling _delete().'
             );
         }
 
-        if (requestParameters['docTitleRequest'] == null) {
+        if (requestParameters['userId'] == null) {
             throw new runtime.RequiredError(
-                'docTitleRequest',
-                'Required parameter "docTitleRequest" was null or undefined when calling create().'
+                'userId',
+                'Required parameter "userId" was null or undefined when calling _delete().'
             );
         }
 
@@ -88,6 +96,40 @@ export class DocControllerApi extends runtime.BaseAPI {
         if (requestParameters['userId'] != null) {
             queryParameters['userId'] = requestParameters['userId'];
         }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/document/{docId}`;
+        urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async _delete(requestParameters: DeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this._deleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async createRaw(requestParameters: CreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocCreateResponse>> {
+        if (requestParameters['docTitleRequest'] == null) {
+            throw new runtime.RequiredError(
+                'docTitleRequest',
+                'Required parameter "docTitleRequest" was null or undefined when calling create().'
+            );
+        }
+
+        const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -117,13 +159,6 @@ export class DocControllerApi extends runtime.BaseAPI {
     /**
      */
     async getGraphRaw(requestParameters: GetGraphRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CommitGraphResponse>> {
-        if (requestParameters['userId'] == null) {
-            throw new runtime.RequiredError(
-                'userId',
-                'Required parameter "userId" was null or undefined when calling getGraph().'
-            );
-        }
-
         if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
                 'docId',
@@ -132,10 +167,6 @@ export class DocControllerApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
-
-        if (requestParameters['userId'] != null) {
-            queryParameters['userId'] = requestParameters['userId'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -162,18 +193,23 @@ export class DocControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async readListRaw(requestParameters: ReadListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DocListResponse>>> {
-        if (requestParameters['userId'] == null) {
-            throw new runtime.RequiredError(
-                'userId',
-                'Required parameter "userId" was null or undefined when calling readList().'
-            );
-        }
-
+    async readListRaw(requestParameters: ReadListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDocListResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['userId'] != null) {
-            queryParameters['userId'] = requestParameters['userId'];
+        if (requestParameters['sort'] != null) {
+            queryParameters['sort'] = requestParameters['sort'];
+        }
+
+        if (requestParameters['order'] != null) {
+            queryParameters['order'] = requestParameters['order'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -188,30 +224,35 @@ export class DocControllerApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DocListResponseFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PageDocListResponseFromJSON(jsonValue));
     }
 
     /**
      */
-    async readList(requestParameters: ReadListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DocListResponse>> {
+    async readList(requestParameters: ReadListRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDocListResponse> {
         const response = await this.readListRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async readListSidebarRaw(requestParameters: ReadListSidebarRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DocListSimpleResponse>>> {
-        if (requestParameters['userId'] == null) {
-            throw new runtime.RequiredError(
-                'userId',
-                'Required parameter "userId" was null or undefined when calling readListSidebar().'
-            );
-        }
-
+    async readListSidebarRaw(requestParameters: ReadListSidebarRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDocListSimpleResponse>> {
         const queryParameters: any = {};
 
-        if (requestParameters['userId'] != null) {
-            queryParameters['userId'] = requestParameters['userId'];
+        if (requestParameters['sort'] != null) {
+            queryParameters['sort'] = requestParameters['sort'];
+        }
+
+        if (requestParameters['order'] != null) {
+            queryParameters['order'] = requestParameters['order'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -226,12 +267,12 @@ export class DocControllerApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DocListSimpleResponseFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PageDocListSimpleResponseFromJSON(jsonValue));
     }
 
     /**
      */
-    async readListSidebar(requestParameters: ReadListSidebarRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DocListSimpleResponse>> {
+    async readListSidebar(requestParameters: ReadListSidebarRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDocListSimpleResponse> {
         const response = await this.readListSidebarRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -246,13 +287,6 @@ export class DocControllerApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['userId'] == null) {
-            throw new runtime.RequiredError(
-                'userId',
-                'Required parameter "userId" was null or undefined when calling updateDocumentTitle().'
-            );
-        }
-
         if (requestParameters['docTitleRequest'] == null) {
             throw new runtime.RequiredError(
                 'docTitleRequest',
@@ -261,10 +295,6 @@ export class DocControllerApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
-
-        if (requestParameters['userId'] != null) {
-            queryParameters['userId'] = requestParameters['userId'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 

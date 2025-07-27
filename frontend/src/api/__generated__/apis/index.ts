@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-export * from './APIApi';
 export * from './AuthApi';
-export * from './BranchControllerApi';
+export * from './BranchAPIApi';
 export * from './CommitControllerApi';
 export * from './DocControllerApi';
-export * from './SaveControllerApi';
+export * from './SaveAPIApi';
+export * from './UserAPIApi';

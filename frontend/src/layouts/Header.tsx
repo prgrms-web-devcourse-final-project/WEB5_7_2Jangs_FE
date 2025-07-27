@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth"
 
 export default function Header() {
   const navigate = useNavigate()
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth()
 
   const handleSignUp = () => {
     navigate("/signup")
@@ -31,13 +31,20 @@ export default function Header() {
           </Link>
 
           {isAuthenticated ? (
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
-            >
-              로그아웃
-            </Button>
+            <div className="flex items-center space-x-4">
+              {user && (
+                <span className="text-slate-700 font-medium">
+                  안녕하세요, {user.name}님!
+                </span>
+              )}
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="bg-black text-white hover:bg-gray-800 border-black px-6 py-2 rounded-md"
+              >
+                로그아웃
+              </Button>
+            </div>
           ) : (
             <>
               <div className="flex items-center space-x-4">

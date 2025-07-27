@@ -31,14 +31,13 @@ export default function DocumentDetailPage() {
   }>()
 
   const [searchParams] = useSearchParams()
-  const { userId } = useAuth()
 
   // 특정 query parameter 값 가져오기
   const modeParam = searchParams.get("mode")
   const mode = (modeParam as Mode) ?? "save"
   const commitId = searchParams.get("commitId")
   const compareCommitId = searchParams.get("compareCommitId")
-  const tempId = searchParams.get("tempId")
+  const saveId = searchParams.get("saveId")
 
   const navigate = useNavigate()
   const [editorData, setEditorData] = useState<OutputData | undefined>(EditData)
@@ -52,17 +51,12 @@ export default function DocumentDetailPage() {
     throw new Error("Document ID is required")
   }
 
-  if (!userId) {
-    throw new Error("User not authenticated")
-  }
-
   // API를 통해 그래프 데이터 가져오기
   const {
     data: graphData,
     isLoading: isGraphLoading,
     error: graphError,
   } = useGraphData({
-    userId,
     documentId: Number.parseInt(documentId),
   })
 
@@ -78,7 +72,7 @@ export default function DocumentDetailPage() {
 
   const handleNodeMenuClick = (
     type: CommitNodeMenuType | TempNodeMenuType,
-    idByType: number, // commitId or tempId
+    idByType: number, // commitId or saveId
   ) => {
     console.log("node click", type, documentId, commitId)
     switch (type) {
@@ -114,7 +108,7 @@ export default function DocumentDetailPage() {
         break
       case "temp-edit":
         console.log("temp-edit", idByType)
-        navigate(`/documents/${documentId}?mode=save&tempId=${idByType}`)
+        navigate(`/documents/${documentId}?mode=save&saveId=${idByType}`)
         break
     }
   }
@@ -306,7 +300,7 @@ export default function DocumentDetailPage() {
           <DocumentGraph
             data={GraphData}
             currentCommitId={commitId}
-            currentTempId={tempId}
+            currentSaveId={saveId}
             onNodeMenuClick={handleNodeMenuClick}
             onBranchDelete={handleBranchDelete}
           />

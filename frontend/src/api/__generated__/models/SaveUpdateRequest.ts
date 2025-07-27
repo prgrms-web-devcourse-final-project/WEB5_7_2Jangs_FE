@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { SaveBlock } from './SaveBlock';
-import {
-    SaveBlockFromJSON,
-    SaveBlockFromJSONTyped,
-    SaveBlockToJSON,
-    SaveBlockToJSONTyped,
-} from './SaveBlock';
-
 /**
  * 
  * @export
@@ -29,10 +21,10 @@ import {
 export interface SaveUpdateRequest {
     /**
      * 
-     * @type {Array<SaveBlock>}
+     * @type {Array<{ [key: string]: any; }>}
      * @memberof SaveUpdateRequest
      */
-    content?: Array<SaveBlock>;
+    content?: Array<{ [key: string]: any; }>;
 }
 
 /**
@@ -52,7 +44,7 @@ export function SaveUpdateRequestFromJSONTyped(json: any, ignoreDiscriminator: b
     }
     return {
         
-        'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(SaveBlockFromJSON)),
+        'content': json['content'] == null ? undefined : json['content'],
     };
 }
 
@@ -67,7 +59,7 @@ export function SaveUpdateRequestToJSONTyped(value?: SaveUpdateRequest | null, i
 
     return {
         
-        'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(SaveBlockToJSON)),
+        'content': value['content'],
     };
 }
 

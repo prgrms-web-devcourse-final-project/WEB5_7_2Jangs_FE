@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { SaveBlock } from './SaveBlock';
-import {
-    SaveBlockFromJSON,
-    SaveBlockFromJSONTyped,
-    SaveBlockToJSON,
-    SaveBlockToJSONTyped,
-} from './SaveBlock';
-
 /**
  * 
  * @export
@@ -35,10 +27,10 @@ export interface SaveGetResponse {
     updatedAt?: Date;
     /**
      * 
-     * @type {Array<SaveBlock>}
+     * @type {Array<{ [key: string]: any; }>}
      * @memberof SaveGetResponse
      */
-    content?: Array<SaveBlock>;
+    content?: Array<{ [key: string]: any; }>;
 }
 
 /**
@@ -59,7 +51,7 @@ export function SaveGetResponseFromJSONTyped(json: any, ignoreDiscriminator: boo
     return {
         
         'updatedAt': json['updatedAt'] == null ? undefined : (new Date(json['updatedAt'])),
-        'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(SaveBlockFromJSON)),
+        'content': json['content'] == null ? undefined : json['content'],
     };
 }
 
@@ -75,7 +67,7 @@ export function SaveGetResponseToJSONTyped(value?: SaveGetResponse | null, ignor
     return {
         
         'updatedAt': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
-        'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(SaveBlockToJSON)),
+        'content': value['content'],
     };
 }
 

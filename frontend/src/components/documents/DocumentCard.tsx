@@ -15,7 +15,7 @@ interface DocumentCardProps {
   viewMode: "grid" | "list"
   onDocumentClick: (doc: Document) => void
   onEditTitle: (id: number) => void
-  onDeleteDocument: (id: number) => void
+  onDeleteDocument: (doc: Document) => void
 }
 
 export default function DocumentCard({
@@ -84,7 +84,7 @@ export default function DocumentCard({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation()
-                      onDeleteDocument(document.id)
+                      onDeleteDocument(document)
                     }}
                     className="cursor-pointer text-red-600 focus:text-red-600"
                   >
@@ -145,7 +145,7 @@ export default function DocumentCard({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation()
-                      onDeleteDocument(document.id)
+                      onDeleteDocument(document)
                     }}
                     className="cursor-pointer text-red-600 focus:text-red-600"
                   >

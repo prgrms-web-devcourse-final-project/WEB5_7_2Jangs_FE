@@ -1,11 +1,11 @@
 import {
-  APIApi,
+  UserAPIApi,
   AuthApi,
-  BranchControllerApi,
+  BranchAPIApi,
   CommitControllerApi,
   Configuration,
   DocControllerApi,
-  SaveControllerApi,
+  SaveAPIApi,
 } from "./__generated__"
 
 export const BACKEND_API = import.meta.env.DEV ? "" : "https://docsa.kro.kr"
@@ -31,9 +31,9 @@ const config = new Configuration({
 // 모든 API 클라이언트를 하나의 객체로 통합
 export const apiClient = {
   auth: new AuthApi(config),
-  user: new APIApi(config),
-  branch: new BranchControllerApi(config),
+  user: new UserAPIApi(config),
+  branch: new BranchAPIApi(config),
   commit: new CommitControllerApi(config),
   document: new DocControllerApi(config),
-  save: new SaveControllerApi(config),
+  save: new SaveAPIApi(config),
 }

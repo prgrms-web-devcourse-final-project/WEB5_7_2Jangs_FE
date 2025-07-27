@@ -4,38 +4,34 @@ import type { GraphDataType, Commit, GraphNode } from "@/types/graph"
 import { getBranchColor, GRAPH_LAYOUT } from "@/lib/graphUtils"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
-import type {
-  CommitGraphResponse,
-  CommitDto,
-  BranchDto,
-  EdgeDto,
-} from "@/api/__generated__"
+import type { CommitGraphResponse } from "@/api/__generated__"
+import type { CommitDto } from "@/api/__generated__/models/CommitDto"
+import type { BranchDto } from "@/api/__generated__/models/BranchDto"
+import type { EdgeDto } from "@/api/__generated__/models/EdgeDto"
 
 interface UseGraphRenderProps {
   data: GraphDataType
   activeCommitId?: string | null
-  activeTempId?: string | null
+  activeSaveId?: string | null
   isMainBranchLeafCommit: boolean
 }
 
 interface UseGraphDataProps {
-  userId: number
   documentId: number
 }
 
 // API 호출과 데이터 변환을 담당하는 새로운 useGraphData 훅
-export function useGraphData({ userId, documentId }: UseGraphDataProps) {
+export function useGraphData({ documentId }: UseGraphDataProps) {
   return useQuery({
-    queryKey: ["graphData", userId, documentId],
+    queryKey: ["graphData", documentId],
     queryFn: async (): Promise<GraphDataType> => {
       const response = await apiClient.document.getGraph({
-        userId,
         docId: documentId,
       })
 
       return transformApiResponseToGraphData(response)
     },
-    enabled: !!(userId && documentId),
+    enabled: !!documentId,
   })
 }
 
@@ -69,7 +65,7 @@ function transformBranchDto(dto: BranchDto) {
     fromCommitId: dto.fromCommitId || null,
     rootCommitId: dto.rootCommitId || 0,
     leafCommitId: dto.leafCommitId || 0,
-    tempId: dto.saveId || null, // saveId를 tempId로 매핑
+    saveId: dto.saveId || null,
   }
 }
 
@@ -84,7 +80,7 @@ function transformEdgeDto(dto: EdgeDto) {
 export function useGraphRender({
   data,
   activeCommitId,
-  activeTempId,
+  activeSaveId,
   isMainBranchLeafCommit,
 }: UseGraphRenderProps) {
   // 커밋을 React Flow 노드로 변환
@@ -223,9 +219,9 @@ export function useGraphRender({
     const tempNodesArray: GraphNode[] = []
     const tempEdgesArray: Edge[] = []
 
-    // tempId가 있는 브랜치들을 찾아서 tempNode 생성
+    // saveId가 있는 브랜치들을 찾아서 tempNode 생성
     for (const branch of data.branches) {
-      if (branch.tempId) {
+      if (branch.saveId) {
         const branchName = branch.name
         const color = getBranchColor(branchName)
 
@@ -239,17 +235,17 @@ export function useGraphRender({
             GRAPH_LAYOUT.BASE_Y_OFFSET * 0.7 +
             GRAPH_LAYOUT.BASE_Y_OFFSET
 
-          const tempNodeId = `temp-${branch.tempId}`
+          const saveNodeId = `save-${branch.saveId}`
 
           // 현재 커밋인지 확인
-          const isCurrentTemp = activeTempId === branch.tempId.toString()
+          const isCurrentTemp = activeSaveId === branch.saveId.toString()
 
           tempNodesArray.push({
-            id: tempNodeId,
+            id: saveNodeId,
             position: { x: xPosition, y: yPosition },
             data: {
               nodeType: "temp",
-              tempId: branch.tempId,
+              saveId: branch.saveId,
               branchName,
               color,
               isCurrentTemp,
@@ -272,7 +268,7 @@ export function useGraphRender({
           tempEdgesArray.push({
             id: `temp-edge-${branch.id}`,
             source: `commit-${branch.leafCommitId.toString()}`,
-            target: tempNodeId,
+            target: saveNodeId,
             type: "smoothstep",
             animated: true,
             style: {
@@ -289,7 +285,7 @@ export function useGraphRender({
     }
 
     return { tempNodes: tempNodesArray, tempEdges: tempEdgesArray }
-  }, [data, infoByBranch, activeTempId])
+  }, [data, infoByBranch, activeSaveId])
 
   return {
     nodes: [...commitNodes, ...tempNodes],

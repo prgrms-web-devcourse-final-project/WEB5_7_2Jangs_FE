@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 비밀번호 변경용 인증코드 요청 DTO
+ * 비밀번호 변경용 인증코드 요청
  * @export
  * @interface PwdResetCodeRequest
  */

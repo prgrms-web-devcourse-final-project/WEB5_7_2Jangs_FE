@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
 import { useAuth } from "./useAuth"
-import type { DocListResponse } from "@/api/__generated__"
+import type { DocListResponse, PageDocListResponse } from "@/api/__generated__"
+
+const PAGE_SIZE = 10
 
 // API 응답을 프론트엔드 Document 타입으로 변환
 function transformDocListResponse(apiDoc: DocListResponse) {
@@ -25,25 +27,37 @@ function transformDocListResponse(apiDoc: DocListResponse) {
 
 export function useDocuments() {
   const [searchQuery, setSearchQuery] = useState("")
-  const { userId, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const {
-    data: documents = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["documents", userId],
-    queryFn: async () => {
-      if (!userId) {
-        throw new Error("User not authenticated")
-      }
-      const response = await apiClient.document.readList({ userId })
-      return response.map(transformDocListResponse)
+  const { data, isLoading, error, refetch } = useInfiniteQuery({
+    queryKey: ["documents"],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      const response = await apiClient.document.readList({
+        page: pageParam,
+        size: PAGE_SIZE,
+      })
+      return response
     },
-    enabled: isAuthenticated && !!userId, // 인증된 경우에만 실행
+    getNextPageParam: (lastPage: PageDocListResponse) => {
+      // 마지막 페이지가 아니면 다음 페이지 번호 반환
+      if (!lastPage.last) {
+        return (lastPage.number ?? 1) + 1
+      }
+
+      return undefined
+    },
+    initialPageParam: 1,
+    enabled: isAuthenticated,
   })
+
+  // InfiniteData를 평면 배열로 변환
+  const documents = useMemo(() => {
+    if (!data) return []
+    return data.pages.flatMap((page) =>
+      (page.content ?? []).map(transformDocListResponse),
+    )
+  }, [data])
 
   const filteredDocuments = useMemo(() => {
     return documents.filter(

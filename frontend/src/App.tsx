@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Router } from "./routes/Router"
+import { AuthProvider } from "./hooks/useAuth"
 import "./index.css"
 
 // QueryClient 생성
@@ -20,7 +21,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

@@ -29,7 +29,7 @@ export interface Branch {
   fromCommitId: number | null
   rootCommitId: number
   leafCommitId: number
-  tempId: number | null
+  saveId: number | null
 }
 
 export type GraphDataType = {

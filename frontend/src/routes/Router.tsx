@@ -7,6 +7,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage"
 import DocumentsPage from "@/pages/DocumentsPage"
 import DocumentDetailPage from "@/pages/DocumentDetailPage"
 import MergePage from "@/pages/MergePage"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 export const Router = () => {
   return (
@@ -17,9 +18,30 @@ export const Router = () => {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/documents/:id" element={<DocumentDetailPage />} />
-          <Route path="/merge" element={<MergePage />} />
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute>
+                <DocumentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/documents/:id"
+            element={
+              <ProtectedRoute>
+                <DocumentDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/merge"
+            element={
+              <ProtectedRoute>
+                <MergePage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

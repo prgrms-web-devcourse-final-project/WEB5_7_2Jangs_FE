@@ -53,7 +53,7 @@ export const GraphData = {
       fromCommitId: null,
       rootCommitId: 11,
       leafCommitId: 13,
-      tempId: null,
+      saveId: null,
     },
     {
       id: 102,
@@ -62,7 +62,7 @@ export const GraphData = {
       fromCommitId: 12,
       rootCommitId: 14,
       leafCommitId: 14,
-      tempId: 1001,
+      saveId: 1001,
     },
   ],
 }
