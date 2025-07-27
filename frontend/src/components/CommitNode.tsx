@@ -25,7 +25,11 @@ interface CommitNodeProps {
   isCurrentCommit: boolean
   isLastCommit: boolean
   showMergeButton: boolean
-  onNodeMenuClick: (type: CommitNodeMenuType, commitId: number) => void
+  onNodeMenuClick: (
+    type: CommitNodeMenuType,
+    commitId: number,
+    isLastCommit: boolean,
+  ) => void
   openDropdownId: string | null
   setOpenDropdownId: (id: string | null) => void
 }
@@ -124,7 +128,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("commit-view", commit.id)
+              onNodeMenuClick("commit-view", commit.id, isLastCommit)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -135,7 +139,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("commit-compare", commit.id)
+              onNodeMenuClick("commit-compare", commit.id, isLastCommit)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -146,7 +150,7 @@ const CommitNode = React.memo(function CommitNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("commit-continueEdit", commit.id)
+              onNodeMenuClick("commit-continueEdit", commit.id, isLastCommit)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"
@@ -158,7 +162,7 @@ const CommitNode = React.memo(function CommitNode({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeMenuClick("commit-merge", commit.id)
+                onNodeMenuClick("commit-merge", commit.id, isLastCommit)
                 setOpenDropdownId(null)
               }}
               className="cursor-pointer text-green-600 focus:text-green-600"
@@ -171,7 +175,7 @@ const CommitNode = React.memo(function CommitNode({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeMenuClick("commit-delete", commit.id)
+                onNodeMenuClick("commit-delete", commit.id, isLastCommit)
                 setOpenDropdownId(null)
               }}
               className="cursor-pointer text-red-600 focus:text-red-600"

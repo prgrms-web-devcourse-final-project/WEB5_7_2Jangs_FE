@@ -16,6 +16,7 @@ export interface DocumentGraphProps {
   onNodeMenuClick: (
     type: CommitNodeMenuType | TempNodeMenuType,
     commitId: number,
+    isLastCommit?: boolean,
   ) => void
   onBranchDelete?: (branchId: number) => void
 }

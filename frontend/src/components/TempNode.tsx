@@ -18,7 +18,11 @@ interface TempNodeProps {
   isCurrentTemp: boolean
   title: string
   description: string
-  onNodeMenuClick: (type: "temp-edit", commitId: number) => void
+  onNodeMenuClick: (
+    type: "temp-edit",
+    commitId: number,
+    isLastCommit?: boolean,
+  ) => void
   openDropdownId: string | null
   setOpenDropdownId: (id: string | null) => void
 }
@@ -118,7 +122,7 @@ const TempNode = React.memo(function TempNode({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation()
-              onNodeMenuClick("temp-edit", tempId)
+              onNodeMenuClick("temp-edit", tempId, false)
               setOpenDropdownId(null)
             }}
             className="cursor-pointer"

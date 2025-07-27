@@ -7,6 +7,7 @@ import { Menu } from "lucide-react"
 import Loading from "@/components/Loading"
 import DocumentListModal from "@/components/DocumentListModal"
 import DocumentContent, {} from "@/components/DocumentContent"
+import BranchEditModal from "@/components/BranchEditModal"
 
 import { alert, confirm, alertDialog } from "@/lib/utils"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
@@ -50,6 +51,12 @@ export default function DocumentDetailPage() {
 
   const navigate = useNavigate()
   const [isDocumentListOpen, setIsDocumentListOpen] = useState(false)
+  const [isBranchEditModalOpen, setIsBranchEditModalOpen] = useState(false)
+  const [branchEditData, setBranchEditData] = useState<{
+    commitId: number
+    isLastCommit: boolean
+    currentBranchName?: string
+  } | null>(null)
 
   // 현재 브랜치 ID 계산
   const getCurrentBranchId = () => {
@@ -86,9 +93,10 @@ export default function DocumentDetailPage() {
     )
   }
 
-  const handleNodeMenuClick = (
+  const handleNodeMenuClick = async (
     type: CommitNodeMenuType | TempNodeMenuType,
     idByType: number, // commitId or saveId
+    isLastCommit = false,
   ) => {
     console.log("node click", type, documentId, commitId)
     switch (type) {
@@ -106,9 +114,21 @@ export default function DocumentDetailPage() {
         )
         break
       }
-      case "commit-continueEdit":
-        // navigate(`/documents/${documentId}?mode=edit&commitId=${commitId}`)
+      case "commit-continueEdit": {
+        // 현재 브랜치 이름 찾기
+        const currentCommit = graphData?.commits.find((c) => c.id === idByType)
+        const currentBranch = graphData?.branches.find(
+          (b) => b.id === currentCommit?.branchId,
+        )
+
+        setBranchEditData({
+          commitId: idByType,
+          isLastCommit,
+          currentBranchName: currentBranch?.name || "",
+        })
+        setIsBranchEditModalOpen(true)
         break
+      }
       case "commit-merge": {
         // 현재 커밋과 선택된 커밋을 병합
         if (!commitId || !idByType || commitId === idByType.toString()) {
@@ -126,6 +146,38 @@ export default function DocumentDetailPage() {
         console.log("temp-edit", idByType)
         navigate(`/documents/${documentId}?mode=save&saveId=${idByType}`)
         break
+    }
+  }
+
+  // 브랜치 생성/편집 확인 핸들러
+  const handleBranchEditConfirm = async (branchName: string) => {
+    if (!branchEditData) return
+
+    try {
+      const result = await apiClient.branch.createBranchOrSave({
+        documentId: Number.parseInt(documentId),
+        branchCreateRequest: {
+          name: branchName,
+          fromCommitId: branchEditData.commitId,
+        },
+      })
+
+      if (!result.branchId || !result.saveId) {
+        alertDialog("브랜치 생성에 실패했습니다.", "오류", "destructive")
+        return
+      }
+
+      setIsBranchEditModalOpen(false)
+      setBranchEditData(null)
+
+      navigate(
+        `/documents/${documentId}?mode=edit&commitId=${commitId}&branchId=${result.branchId}&saveId=${result.saveId}`,
+      )
+
+      window.location.reload()
+    } catch (error) {
+      console.error("브랜치 생성 중 오류:", error)
+      alertDialog("브랜치 생성 중 오류가 발생했습니다.", "오류", "destructive")
     }
   }
 
@@ -247,6 +299,18 @@ export default function DocumentDetailPage() {
         onOpenChange={setIsDocumentListOpen}
         onDocumentSelect={handleDocumentListModalClick}
         currentDocumentId={Number.parseInt(documentId)}
+      />
+
+      {/* 브랜치 편집 모달 */}
+      <BranchEditModal
+        isOpen={isBranchEditModalOpen}
+        onClose={() => {
+          setIsBranchEditModalOpen(false)
+          setBranchEditData(null)
+        }}
+        onConfirm={handleBranchEditConfirm}
+        isLastCommit={branchEditData?.isLastCommit || false}
+        defaultBranchName={branchEditData?.currentBranchName || ""}
       />
     </>
   )
