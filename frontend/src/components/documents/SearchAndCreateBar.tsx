@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Search, Plus, Grid3X3, List } from "lucide-react"
 
 interface SearchAndCreateBarProps {
@@ -8,6 +15,10 @@ interface SearchAndCreateBarProps {
   viewMode: "grid" | "list"
   toggleViewMode: () => void
   onCreateClick: () => void
+  sort: "title" | "updatedAt"
+  setSort: (sort: "title" | "updatedAt") => void
+  order: "asc" | "desc"
+  setOrder: (order: "asc" | "desc") => void
 }
 
 export default function SearchAndCreateBar({
@@ -16,6 +27,10 @@ export default function SearchAndCreateBar({
   viewMode,
   toggleViewMode,
   onCreateClick,
+  sort,
+  setSort,
+  order,
+  setOrder,
 }: SearchAndCreateBarProps) {
   return (
     <div className="mb-8 flex items-center gap-4">
@@ -31,6 +46,29 @@ export default function SearchAndCreateBar({
             className="pl-10 h-12 bg-white border-slate-200 focus:border-slate-800 focus:ring-slate-800 text-base"
           />
         </div>
+      </div>
+
+      {/* 정렬 옵션 */}
+      <div className="flex items-center gap-2">
+        <Select value={sort} onValueChange={setSort}>
+          <SelectTrigger className="w-32 h-12">
+            <SelectValue placeholder="정렬 기준" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="updatedAt">수정일</SelectItem>
+            <SelectItem value="title">제목</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={order} onValueChange={setOrder}>
+          <SelectTrigger className="w-28 h-12">
+            <SelectValue placeholder="순서" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">내림차순</SelectItem>
+            <SelectItem value="asc">오름차순</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Button

@@ -26,6 +26,10 @@ export default function DocumentsList() {
     toggleViewMode,
     isLoading,
     filteredDocuments,
+    sort,
+    setSort,
+    order,
+    setOrder,
   } = useDocuments()
 
   const createDocument = useCreateDocument()
@@ -60,6 +64,10 @@ export default function DocumentsList() {
           viewMode={viewMode}
           toggleViewMode={toggleViewMode}
           onCreateClick={createDocument.openCreateModal}
+          sort={sort}
+          setSort={setSort}
+          order={order}
+          setOrder={setOrder}
         />
 
         {/* 문서 리스트 */}

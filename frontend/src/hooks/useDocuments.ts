@@ -6,6 +6,9 @@ import type { DocListResponse, PageDocListResponse } from "@/api/__generated__"
 
 const PAGE_SIZE = 10
 
+type Sort = "title" | "updatedAt"
+type Order = "asc" | "desc"
+
 // API 응답을 프론트엔드 Document 타입으로 변환
 function transformDocListResponse(apiDoc: DocListResponse) {
   return {
@@ -27,14 +30,18 @@ function transformDocListResponse(apiDoc: DocListResponse) {
 
 export function useDocuments() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [sort, setSort] = useState<Sort>("updatedAt")
+  const [order, setOrder] = useState<Order>("desc")
   const { isAuthenticated } = useAuth()
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const { data, isLoading, error, refetch } = useInfiniteQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", sort, order], // sort와 order를 queryKey에 포함
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const response = await apiClient.document.readList({
         page: pageParam,
+        sort: sort,
+        order: order,
         size: PAGE_SIZE,
       })
       return response
@@ -42,7 +49,7 @@ export function useDocuments() {
     getNextPageParam: (lastPage: PageDocListResponse) => {
       // 마지막 페이지가 아니면 다음 페이지 번호 반환
       if (!lastPage.last) {
-        return (lastPage.number ?? 1) + 1
+        return (lastPage.pageable?.pageNumber ?? 1) + 1
       }
 
       return undefined
@@ -83,5 +90,10 @@ export function useDocuments() {
     viewMode,
     toggleViewMode,
     filteredDocuments,
+    // Sort functionality
+    sort,
+    setSort,
+    order,
+    setOrder,
   }
 }
