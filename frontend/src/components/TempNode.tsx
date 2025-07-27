@@ -34,6 +34,7 @@ const TempNode = React.memo(function TempNode({
   openDropdownId,
   setOpenDropdownId,
 }: TempNodeProps) {
+  console.log("TempNode", tempId)
   // 개별 노드의 hover 상태 관리
   const [hoveredTemp, setHoveredTemp] = useState<{
     tempData: { tempId: number; title: string; description: string }

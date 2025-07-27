@@ -89,7 +89,7 @@ export default function DocumentGraph({
             />
           ) : (
             <TempNode
-              tempId={node.data.tempId}
+              tempId={node.data.saveId}
               branchName={node.data.branchName}
               color={node.data.color}
               isCurrentTemp={node.data.isCurrentTemp}
