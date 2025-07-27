@@ -1,9 +1,14 @@
-import DocumentEditor from "./DocumentEditor"
+import DocumentEditor, { type DocumentEditorRef } from "./DocumentEditor"
 import DocumentCompareView from "./DocumentCompareView"
+import SaveCommitModal from "./SaveCommitModal"
 import { EditData } from "@/mock/EditData"
 import type { DocumentContentMode, DocumentMode } from "@/types/document"
 import { useDocumentContent } from "@/hooks/useDocumentContent"
 import type { OutputData } from "@editorjs/editorjs"
+import { Button } from "./ui/button"
+import { apiClient } from "@/api/apiClient"
+import { useRef, useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export default function DocumentContent({
   documentMode,
@@ -27,6 +32,13 @@ export default function DocumentContent({
     compareId,
     documentId,
   })
+
+  const editorRef = useRef<DocumentEditorRef>(null)
+  const queryClient = useQueryClient()
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean
+    mode: "save" | "commit"
+  }>({ isOpen: false, mode: "save" })
 
   // API 데이터를 OutputData로 변환하는 함수
   const convertToEditorData = (data: any): OutputData => {
@@ -55,6 +67,104 @@ export default function DocumentContent({
     console.log("데이터 변경:", newData)
   }
 
+  // 저장 API 호출
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      content,
+    }: {
+      content: any[]
+    }) => {
+      if (!saveId) throw new Error("저장 ID가 없습니다")
+
+      return await apiClient.save.updateSave({
+        documentId,
+        saveId: Number(saveId),
+        saveUpdateRequest: {
+          content,
+        },
+      })
+    },
+    onSuccess: () => {
+      // 그래프 데이터 refetch
+      queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
+      setModalState({ isOpen: false, mode: "save" })
+    },
+    onError: (error) => {
+      console.error("저장 실패:", error)
+      alert("저장에 실패했습니다.")
+    },
+  })
+
+  // 커밋 API 호출
+  const commitMutation = useMutation({
+    mutationFn: async ({
+      title,
+      description,
+      content,
+    }: {
+      title: string
+      description?: string
+      content: any[]
+    }) => {
+      return await apiClient.commit.createCommit({
+        docId: documentId,
+        createCommitRequest: {
+          title,
+          description,
+          blocks: content.map((block) => ({ data: block })),
+          blockOrders: content.map((_, index) => index.toString()),
+        },
+      })
+    },
+    onSuccess: () => {
+      // 그래프 데이터 refetch
+      queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
+      setModalState({ isOpen: false, mode: "commit" })
+    },
+    onError: (error) => {
+      console.error("커밋 실패:", error)
+      alert("커밋에 실패했습니다.")
+    },
+  })
+
+  // 저장하기 버튼 클릭 핸들러
+  const handleSave = () => {
+    setModalState({ isOpen: true, mode: "save" })
+  }
+
+  // 기록하기 버튼 클릭 핸들러
+  const handleCommit = () => {
+    setModalState({ isOpen: true, mode: "commit" })
+  }
+
+  // Modal 확인 핸들러
+  const handleModalConfirm = async ({
+    title,
+    description,
+  }: {
+    title: string
+    description?: string
+  }) => {
+    if (!editorRef.current) {
+      alert("에디터가 준비되지 않았습니다.")
+      return
+    }
+
+    const currentData = await editorRef.current.saveData()
+    if (!currentData) {
+      alert("현재 문서 데이터를 가져올 수 없습니다.")
+      return
+    }
+
+    const content = currentData.blocks || []
+
+    if (modalState.mode === "save") {
+      saveMutation.mutate({ content })
+    } else {
+      commitMutation.mutate({ title, description, content })
+    }
+  }
+
   // 로딩 상태
   if (isLoading) {
     return <div>데이터를 로딩 중입니다...</div>
@@ -65,24 +175,67 @@ export default function DocumentContent({
     return <div>오류: {error}</div>
   }
 
-  switch (contentMode) {
-    case "edit":
-    case "view":
-      return (
-        <DocumentEditor
-          isEditable={contentMode === "edit"}
-          initialData={convertToEditorData(originalData)}
-          onDataChange={onDataChange}
-        />
-      )
-    case "compare":
-      return (
-        <DocumentCompareView
-          originalData={convertToEditorData(originalData) || EditData}
-          modifiedData={convertToEditorData(modifiedData) || EditData}
-        />
-      )
-    default:
-      return <div>Unknown mode: {contentMode}</div>
+  return (
+    <>
+      {renderContent()}
+      <SaveCommitModal
+        isOpen={modalState.isOpen}
+        mode={modalState.mode}
+        onClose={() => setModalState({ isOpen: false, mode: "save" })}
+        onConfirm={handleModalConfirm}
+        isLoading={saveMutation.isPending || commitMutation.isPending}
+      />
+    </>
+  )
+
+  function renderContent() {
+    switch (contentMode) {
+      case "edit":
+        return (
+          <div className="h-full flex flex-col">
+            <DocumentEditor
+              ref={editorRef}
+              isEditable={true}
+              initialData={convertToEditorData(originalData)}
+              onDataChange={onDataChange}
+            />
+            <div className="flex justify-end gap-10 mt-4 p-4 border-t">
+              <Button
+                onClick={handleSave}
+                variant="outline"
+                size="2xl"
+                disabled={saveMutation.isPending}
+              >
+                저장하기
+              </Button>
+              <Button
+                onClick={handleCommit}
+                variant="default"
+                size="2xl"
+                disabled={commitMutation.isPending}
+              >
+                기록하기
+              </Button>
+            </div>
+          </div>
+        )
+      case "view":
+        return (
+          <DocumentEditor
+            isEditable={false}
+            initialData={convertToEditorData(originalData)}
+            onDataChange={onDataChange}
+          />
+        )
+      case "compare":
+        return (
+          <DocumentCompareView
+            originalData={convertToEditorData(originalData) || EditData}
+            modifiedData={convertToEditorData(modifiedData) || EditData}
+          />
+        )
+      default:
+        return <div>Unknown mode: {contentMode}</div>
+    }
   }
 }
