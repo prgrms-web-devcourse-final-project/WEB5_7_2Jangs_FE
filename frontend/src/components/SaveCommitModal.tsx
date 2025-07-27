@@ -24,7 +24,7 @@ export default function SaveCommitModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (mode === "commit" && !title.trim()) return
 
     onConfirm({
       title: title.trim(),

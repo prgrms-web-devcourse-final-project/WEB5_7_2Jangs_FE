@@ -52,7 +52,7 @@ export default function DocumentContent({
     // API 데이터 배열을 OutputData로 변환
     if (Array.isArray(data)) {
       return {
-        time: Date.now(),
+        time: EditData.time, // 고정된 time을 사용하여 불필요한 재생성 방지
         blocks: data,
         version: "2.30.8",
       } as OutputData
@@ -85,7 +85,7 @@ export default function DocumentContent({
       })
     },
     onSuccess: () => {
-      // 그래프 데이터 refetch
+      // 그래프 데이터만 refetch (문서 내용은 현재 편집 중인 상태 유지)
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "save" })
     },
@@ -117,7 +117,7 @@ export default function DocumentContent({
       })
     },
     onSuccess: () => {
-      // 그래프 데이터 refetch
+      // 그래프 데이터만 refetch (문서 내용은 현재 편집 중인 상태 유지)
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "commit" })
     },

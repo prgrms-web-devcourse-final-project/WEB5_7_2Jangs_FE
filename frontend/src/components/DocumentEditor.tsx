@@ -134,7 +134,7 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
           editorRef.current = null
         }
       }
-    }, [initialData?.time]) // initialData의 time이 변경될 때마다 재생성
+    }, [!isEditable ? initialData?.time : null]) // 편집 모드가 아닐 때만 initialData 변경에 반응
 
     // Handle mode changes
     useEffect(() => {
