@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router"
 import Logo from "../components/Logo"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
+import { apiClient } from "@/api/apiClient"
 
 export default function Header() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export default function Header() {
 
   const handleLogout = () => {
     logout()
+    apiClient.user.logout()
     navigate("/")
   }
 
