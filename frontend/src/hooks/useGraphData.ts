@@ -227,44 +227,59 @@ export function useGraphRender({
 
         // infoByBranch에서 해당 브랜치의 가장 아래 위치 가져오기
         const branchInfo = infoByBranch[branch.id]
+
+        // 브랜치에 커밋이 없는 경우를 위한 기본 위치 설정
+        let xPosition: number
+        let yPosition: number
+
         if (branchInfo) {
           // 브랜치의 가장 아래 위치에서 80px 아래에 배치
-          const xPosition = branchInfo.xPosition
-          const yPosition =
+          xPosition = branchInfo.xPosition
+          yPosition =
             branchInfo.lastYPosition +
             GRAPH_LAYOUT.BASE_Y_OFFSET * 0.7 +
             GRAPH_LAYOUT.BASE_Y_OFFSET
+        } else {
+          // 커밋이 없는 브랜치의 경우 기본 위치 설정
+          const branchIndex = data.branches.findIndex((b) => b.id === branch.id)
+          xPosition =
+            branchIndex * GRAPH_LAYOUT.BRANCH_SPACING +
+            GRAPH_LAYOUT.BASE_X_OFFSET
+          yPosition = GRAPH_LAYOUT.BASE_Y_OFFSET
+        }
 
-          const saveNodeId = `save-${branch.saveId}`
+        const saveNodeId = `save-${branch.saveId}`
 
-          // 현재 커밋인지 확인
-          const isCurrentTemp = activeSaveId === branch.saveId.toString()
+        // 현재 커밋인지 확인
+        const isCurrentTemp = activeSaveId === branch.saveId.toString()
 
-          tempNodesArray.push({
-            id: saveNodeId,
-            position: { x: xPosition, y: yPosition },
-            data: {
-              nodeType: "temp",
-              saveId: branch.saveId,
-              branchName,
-              color,
-              isCurrentTemp,
-              isTemp: true,
-              title: "임시 저장",
-              description: "임시로 저장된 변경사항",
-            },
-            style: {
-              backgroundColor: "#f9fafb",
-              border: `2px dashed ${color}`,
-              borderRadius: "8px",
-              width: "auto",
-              fontSize: "12px",
-              opacity: 0.8,
-            },
-            sourcePosition: Position.Bottom,
-            targetPosition: Position.Top,
-          } as GraphNode)
+        tempNodesArray.push({
+          id: saveNodeId,
+          position: { x: xPosition, y: yPosition },
+          data: {
+            nodeType: "temp",
+            saveId: branch.saveId,
+            branchName,
+            color,
+            isCurrentTemp,
+            isTemp: true,
+            title: "임시 저장",
+            description: "임시로 저장된 변경사항",
+          },
+          style: {
+            backgroundColor: "#f9fafb",
+            border: `2px dashed ${color}`,
+            borderRadius: "8px",
+            width: "auto",
+            fontSize: "12px",
+            opacity: 0.8,
+          },
+          sourcePosition: Position.Bottom,
+          targetPosition: Position.Top,
+        } as GraphNode)
 
+        // leafCommitId가 있는 경우에만 엣지 생성
+        if (branch.leafCommitId) {
           tempEdgesArray.push({
             id: `temp-edge-${branch.id}`,
             source: `commit-${branch.leafCommitId.toString()}`,
