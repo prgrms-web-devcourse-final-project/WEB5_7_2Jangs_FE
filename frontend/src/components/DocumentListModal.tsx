@@ -8,11 +8,18 @@ import {
 import { formatDateForDocuments } from "@/lib/date"
 import { useDocumentsBySidebar } from "@/hooks/useDocumentsBySidebar"
 import Loading from "@/components/Loading"
+import type { RecentActivityDtoRecentTypeEnum } from "@/api/__generated__"
 
 interface DocumentListModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onDocumentSelect: (documentId: number) => void
+  onDocumentSelect: (
+    documentId: number,
+    recent: {
+      recentType: RecentActivityDtoRecentTypeEnum
+      recentTypeId: number
+    },
+  ) => void
   currentDocumentId?: number
 }
 
@@ -24,8 +31,14 @@ export default function DocumentListModal({
 }: DocumentListModalProps) {
   const { documents, isLoading, error } = useDocumentsBySidebar()
 
-  const handleDocumentClick = (documentId: number) => {
-    onDocumentSelect(documentId)
+  const handleDocumentClick = (
+    documentId: number,
+    recent: {
+      recentType: RecentActivityDtoRecentTypeEnum
+      recentTypeId: number
+    },
+  ) => {
+    onDocumentSelect(documentId, recent)
   }
 
   return (
@@ -63,7 +76,7 @@ export default function DocumentListModal({
                       ? "bg-blue-50 border-blue-200"
                       : ""
                   }`}
-                  onClick={() => handleDocumentClick(doc.id)}
+                  onClick={() => handleDocumentClick(doc.id, doc.recent)}
                 >
                   <div className="flex-1">
                     <h3 className="font-semibold">{doc.title}</h3>

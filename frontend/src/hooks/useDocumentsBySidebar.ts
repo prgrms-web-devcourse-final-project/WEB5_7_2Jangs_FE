@@ -37,17 +37,10 @@ export function useDocumentsBySidebar(
 ) {
   const { isAuthenticated } = useAuth()
 
-  const { sort = "updatedAt", order = "desc", page = 0, size = 50 } = params
-
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["documents-sidebar", sort, order, page, size],
+    queryKey: ["documents-sidebar", params],
     queryFn: async () => {
-      const response = await apiClient.document.readListSidebar({
-        sort,
-        order,
-        page,
-        size,
-      })
+      const response = await apiClient.document.readListSidebar()
       return response
     },
     enabled: isAuthenticated,

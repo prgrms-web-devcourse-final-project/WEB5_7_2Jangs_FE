@@ -10,6 +10,7 @@ import DocumentContent, {} from "@/components/DocumentContent"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
 import type { DocumentMode, DocumentContentMode } from "@/types/document"
+import type { RecentActivityDtoRecentTypeEnum } from "@/api/__generated__"
 
 export default function DocumentDetailPage() {
   const { id: documentId } = useParams<{
@@ -41,9 +42,20 @@ export default function DocumentDetailPage() {
     documentId: Number.parseInt(documentId),
   })
 
-  const handleDocumentListModalClick = (documentId: number) => {
+  const handleDocumentListModalClick = (
+    documentId: number,
+    recent: {
+      recentType: RecentActivityDtoRecentTypeEnum
+      recentTypeId: number
+    },
+  ) => {
     setIsDocumentListOpen(false)
-    navigate(`/documents/${documentId}`)
+
+    const documentMode = recent.recentType === "SAVE" ? "save" : "commit"
+
+    navigate(
+      `/documents/${documentId}?mode=${documentMode}&${documentMode}Id=${recent.recentTypeId}`,
+    )
   }
 
   const handleNodeMenuClick = (
