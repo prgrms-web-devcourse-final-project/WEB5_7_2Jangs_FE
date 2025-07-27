@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Router } from "./routes/Router"
 import { AuthProvider } from "./hooks/useAuth"
+import { AlertProvider } from "./components/ui/alert"
+import { DialogProvider } from "./components/ui/alert-dialog"
 import "./index.css"
 
 // QueryClient 생성
@@ -22,7 +24,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
+        <AlertProvider>
+          <DialogProvider>
+            <Router />
+          </DialogProvider>
+        </AlertProvider>
       </AuthProvider>
     </QueryClientProvider>
   )

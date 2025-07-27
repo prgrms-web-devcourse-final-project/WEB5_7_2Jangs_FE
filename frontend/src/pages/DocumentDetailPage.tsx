@@ -7,6 +7,8 @@ import { Menu } from "lucide-react"
 import Loading from "@/components/Loading"
 import DocumentListModal from "@/components/DocumentListModal"
 import DocumentContent, {} from "@/components/DocumentContent"
+
+import { alert, confirm, alertDialog } from "@/lib/utils"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
 import type { DocumentMode, DocumentContentMode } from "@/types/document"
@@ -111,7 +113,17 @@ export default function DocumentDetailPage() {
 
     // 안전성 검사
     if (branch.name === "main") {
-      alert("메인 브랜치는 삭제할 수 없습니다.")
+      alert("메인 브랜치는 삭제할 수 없습니다.", "destructive")
+      return
+    }
+
+    // 확인 다이얼로그 표시
+    const confirmed = await confirm(
+      `브랜치 '${branch.name}'을(를) 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
+      "브랜치 삭제",
+    )
+
+    if (!confirmed) {
       return
     }
 
@@ -121,6 +133,7 @@ export default function DocumentDetailPage() {
 
       // 임시로 콘솔 로그
       console.log(`브랜치 '${branch.name}'이 삭제되었습니다.`)
+      await alertDialog(`브랜치 '${branch.name}'이 삭제되었습니다.`, "알림")
 
       // 삭제된 브랜치가 현재 브랜치였다면 메인으로 리다이렉트
       const currentCommit = graphData.commits.find(
@@ -131,7 +144,11 @@ export default function DocumentDetailPage() {
       }
     } catch (error) {
       console.error("브랜치 삭제 중 오류:", error)
-      alert("브랜치 삭제 중 오류가 발생했습니다.")
+      await alertDialog(
+        "브랜치 삭제 중 오류가 발생했습니다.",
+        "오류",
+        "destructive",
+      )
     }
   }
 

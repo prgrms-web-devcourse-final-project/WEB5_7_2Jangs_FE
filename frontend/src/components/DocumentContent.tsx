@@ -10,6 +10,8 @@ import { apiClient } from "@/api/apiClient"
 import { useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
+import { useDialog, confirm, alertDialog } from "./ui/alert-dialog"
+
 export default function DocumentContent({
   documentMode,
   contentMode,
@@ -35,6 +37,7 @@ export default function DocumentContent({
 
   const editorRef = useRef<DocumentEditorRef>(null)
   const queryClient = useQueryClient()
+  const { showDialog } = useDialog()
   const [modalState, setModalState] = useState<{
     isOpen: boolean
     mode: "save" | "commit"
@@ -89,9 +92,9 @@ export default function DocumentContent({
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "save" })
     },
-    onError: (error) => {
+    onError: async (error) => {
       console.error("저장 실패:", error)
-      alert("저장에 실패했습니다.")
+      await alertDialog("저장에 실패했습니다.", "오류", "destructive")
     },
   })
 
@@ -121,9 +124,9 @@ export default function DocumentContent({
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "commit" })
     },
-    onError: (error) => {
+    onError: async (error) => {
       console.error("커밋 실패:", error)
-      alert("커밋에 실패했습니다.")
+      await alertDialog("커밋에 실패했습니다.", "오류", "destructive")
     },
   })
 
@@ -146,13 +149,17 @@ export default function DocumentContent({
     description?: string
   }) => {
     if (!editorRef.current) {
-      alert("에디터가 준비되지 않았습니다.")
+      await alertDialog("에디터가 준비되지 않았습니다.", "오류", "destructive")
       return
     }
 
     const currentData = await editorRef.current.saveData()
     if (!currentData) {
-      alert("현재 문서 데이터를 가져올 수 없습니다.")
+      await alertDialog(
+        "현재 문서 데이터를 가져올 수 없습니다.",
+        "오류",
+        "destructive",
+      )
       return
     }
 
