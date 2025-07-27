@@ -10,12 +10,13 @@ import { apiClient } from "@/api/apiClient"
 import { useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import { useDialog, confirm, alertDialog } from "./ui/alert-dialog"
+import { useDialog, alertDialog } from "./ui/alert-dialog"
 
 export default function DocumentContent({
   documentMode,
   contentMode,
   documentId,
+  branchId,
   commitId,
   saveId,
   compareId,
@@ -23,6 +24,7 @@ export default function DocumentContent({
   documentMode: DocumentMode
   contentMode: DocumentContentMode
   documentId: number
+  branchId: number
   commitId: string | null
   saveId: string | null
   compareId: string | null
@@ -115,7 +117,10 @@ export default function DocumentContent({
           title,
           description,
           blocks: content.map((block) => ({ data: block })),
-          blockOrders: content.map((_, index) => index.toString()),
+          blockOrders: content.map(
+            (block, index) => block.id ?? index.toString(),
+          ),
+          branchId,
         },
       })
     },

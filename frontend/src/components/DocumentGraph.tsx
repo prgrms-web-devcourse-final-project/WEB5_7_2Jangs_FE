@@ -5,12 +5,14 @@ import { useGraphRender } from "@/hooks/useGraphData"
 import CommitNode, { type CommitNodeMenuType } from "@/components/CommitNode"
 import TempNode, { type TempNodeMenuType } from "@/components/TempNode"
 import BranchTabs from "@/components/BranchTabs"
-import type { GraphDataType } from "@/types/graph"
+import type { Branch, GraphDataType } from "@/types/graph"
 
 export interface DocumentGraphProps {
   data: GraphDataType
   currentCommitId: string | null
   currentSaveId: string | null
+  currentBranchId: number
+  mainBranch: Branch
   onNodeMenuClick: (
     type: CommitNodeMenuType | TempNodeMenuType,
     commitId: number,
@@ -22,13 +24,14 @@ export default function DocumentGraph({
   data,
   currentCommitId,
   currentSaveId,
+  currentBranchId,
+  mainBranch,
   onNodeMenuClick,
   onBranchDelete,
 }: DocumentGraphProps) {
   // 현재 열린 드롭다운 ID를 관리
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
 
-  const mainBranch = data.branches.find((b) => b.name === "main")
   const activeCommitId =
     currentCommitId ??
     (currentSaveId ? null : mainBranch?.leafCommitId?.toString())
@@ -36,25 +39,6 @@ export default function DocumentGraph({
 
   const isMainBranchLeafCommit =
     mainBranch?.leafCommitId.toString() === activeCommitId
-
-  // 현재 브랜치 ID 계산
-  const getCurrentBranchId = () => {
-    if (currentCommitId) {
-      const commit = data.commits.find(
-        (c) => c.id.toString() === currentCommitId,
-      )
-      return commit?.branchId
-    }
-    if (currentSaveId) {
-      const saveBranch = data.branches.find(
-        (b) => b.saveId?.toString() === currentSaveId,
-      )
-      return saveBranch?.id
-    }
-    return mainBranch?.id
-  }
-
-  const currentBranchId = getCurrentBranchId()
 
   // 이벤트 핸들러 메모이제이션
   const handleNodeMenuClick = useCallback(onNodeMenuClick, [])

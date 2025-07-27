@@ -44,6 +44,27 @@ export default function DocumentDetailPage() {
     documentId: Number.parseInt(documentId),
   })
 
+  const mainBranch = graphData?.branches.find((b) => b.name === "main")
+
+  // 현재 브랜치 ID 계산
+  const getCurrentBranchId = () => {
+    if (commitId) {
+      const commit = graphData?.commits.find(
+        (c) => c.id.toString() === commitId,
+      )
+      return commit?.branchId
+    }
+    if (saveId) {
+      const saveBranch = graphData?.branches.find(
+        (b) => b.saveId?.toString() === saveId,
+      )
+      return saveBranch?.id
+    }
+    return mainBranch?.id
+  }
+
+  const currentBranchId = getCurrentBranchId()
+
   const handleDocumentListModalClick = (
     documentId: number,
     recent: {
@@ -153,7 +174,7 @@ export default function DocumentDetailPage() {
   }
 
   // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시
-  if (isGraphLoading) {
+  if (isGraphLoading || !graphData || !mainBranch || !currentBranchId) {
     return <Loading text="문서를 불러오는 중..." />
   }
 
@@ -193,6 +214,8 @@ export default function DocumentDetailPage() {
 
           <DocumentGraph
             data={graphData}
+            mainBranch={mainBranch}
+            currentBranchId={currentBranchId}
             currentCommitId={commitId}
             currentSaveId={saveId}
             onNodeMenuClick={handleNodeMenuClick}
@@ -206,6 +229,7 @@ export default function DocumentDetailPage() {
             documentId={Number.parseInt(documentId)}
             contentMode={getDocumentContentMode(mode)}
             documentMode={mode}
+            branchId={currentBranchId}
             commitId={commitId}
             saveId={saveId}
             compareId={compareCommitId}
