@@ -1,25 +1,14 @@
 import ResizableLayout from "@/layouts/ResizableLayout"
 import DocumentGraph from "@/components/DocumentGraph"
 import { useGraphData } from "@/hooks/useGraphData"
-import { useAuth } from "@/hooks/useAuth"
 import { useParams, useNavigate, useSearchParams } from "react-router"
-import { useEffect, useState } from "react"
-import type { OutputData } from "@editorjs/editorjs"
-import { EditData } from "@/mock/EditData"
-import { Menu, FileText } from "lucide-react"
+import { useState } from "react"
+import { Menu } from "lucide-react"
 import Loading from "@/components/Loading"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { DocumentList } from "@/mock/DocumentList"
-import { formatDateForDocuments } from "@/lib/date"
+import DocumentListModal from "@/components/DocumentListModal"
 import DocumentContent, {} from "@/components/DocumentContent"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
-import { GraphData } from "@/mock/GraphData"
 import type { DocumentMode, DocumentContentMode } from "@/types/document"
 
 export default function DocumentDetailPage() {
@@ -196,38 +185,12 @@ export default function DocumentDetailPage() {
       </ResizableLayout>
 
       {/* 문서 리스트 모달 */}
-      <Dialog open={isDocumentListOpen} onOpenChange={setIsDocumentListOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              문서 목록
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {DocumentList.map((doc) => (
-              <div
-                key={doc.id}
-                className={`p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
-                  doc.id === Number.parseInt(documentId)
-                    ? "bg-blue-50 border-blue-200"
-                    : ""
-                }`}
-                onClick={() => handleDocumentListModalClick(doc.id)}
-              >
-                <div className="flex-1">
-                  <h3 className="font-semibold">{doc.title}</h3>
-                  <p className="text-sm text-gray-600">{doc.preview}</p>
-                  <div className="flex gap-4 text-xs text-gray-500 mt-2">
-                    <span>생성: {formatDateForDocuments(doc.createdAt)}</span>
-                    <span>수정: {formatDateForDocuments(doc.updatedAt)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DocumentListModal
+        open={isDocumentListOpen}
+        onOpenChange={setIsDocumentListOpen}
+        onDocumentSelect={handleDocumentListModalClick}
+        currentDocumentId={Number.parseInt(documentId)}
+      />
     </>
   )
 }

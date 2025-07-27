@@ -1,0 +1,74 @@
+import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { apiClient } from "@/api/apiClient"
+import { useAuth } from "./useAuth"
+import type { DocListSimpleResponse } from "@/api/__generated__"
+
+type Sort = "title" | "updatedAt"
+type Order = "asc" | "desc"
+
+// API 응답을 프론트엔드 Document 타입으로 변환
+function transformDocListSimpleResponse(apiDoc: DocListSimpleResponse) {
+  return {
+    id: apiDoc.id || 0,
+    title: apiDoc.title || "제목 없음",
+    createdAt: apiDoc.createdAt
+      ? apiDoc.createdAt.toISOString()
+      : new Date().toISOString(),
+    updatedAt: apiDoc.updatedAt
+      ? apiDoc.updatedAt.toISOString()
+      : new Date().toISOString(),
+    recent: {
+      recentType: apiDoc.recent?.recentType || "SAVE",
+      recentTypeId: apiDoc.recent?.recentTypeId || 0,
+    },
+  }
+}
+
+interface UseDocumentsBySidebarParams {
+  sort?: Sort
+  order?: Order
+  page?: number
+  size?: number
+}
+
+export function useDocumentsBySidebar(
+  params: UseDocumentsBySidebarParams = {},
+) {
+  const { isAuthenticated } = useAuth()
+
+  const { sort = "updatedAt", order = "desc", page = 0, size = 50 } = params
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["documents-sidebar", sort, order, page, size],
+    queryFn: async () => {
+      const response = await apiClient.document.readListSidebar({
+        sort,
+        order,
+        page,
+        size,
+      })
+      return response
+    },
+    enabled: isAuthenticated,
+  })
+
+  // 문서 목록 변환
+  const documents = useMemo(() => {
+    if (!data?.content) return []
+    return data.content.map(transformDocListSimpleResponse)
+  }, [data])
+
+  return {
+    documents,
+    isLoading,
+    error,
+    refetch,
+    // 페이징 정보
+    totalElements: data?.totalElements,
+    totalPages: data?.totalPages,
+    currentPage: data?.number,
+    hasNext: !data?.last,
+    hasPrevious: !data?.first,
+  }
+}
