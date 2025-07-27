@@ -13,23 +13,13 @@ import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
 import type { DocumentMode, DocumentContentMode } from "@/types/document"
 import type { RecentActivityDtoRecentTypeEnum } from "@/api/__generated__"
+import { useMutation } from "@tanstack/react-query"
+import { apiClient } from "@/api/apiClient"
 
 export default function DocumentDetailPage() {
   const { id: documentId } = useParams<{
     id: string
   }>()
-
-  const [searchParams] = useSearchParams()
-
-  // 특정 query parameter 값 가져오기
-  const modeParam = searchParams.get("mode")
-  const mode = (modeParam as DocumentMode) ?? "save"
-  const commitId = searchParams.get("commitId")
-  const compareCommitId = searchParams.get("compareCommitId")
-  const saveId = searchParams.get("saveId")
-
-  const navigate = useNavigate()
-  const [isDocumentListOpen, setIsDocumentListOpen] = useState(false)
 
   if (!documentId) {
     throw new Error("Document ID is required")
@@ -45,6 +35,21 @@ export default function DocumentDetailPage() {
   })
 
   const mainBranch = graphData?.branches.find((b) => b.name === "main")
+
+  const [searchParams] = useSearchParams()
+
+  // 특정 query parameter 값 가져오기
+  const modeParam = searchParams.get("mode")
+  const mode = (modeParam as DocumentMode) ?? "commit"
+  const commitId =
+    ((searchParams.get("commitId") ?? mode === "commit")
+      ? mainBranch?.leafCommitId?.toString()
+      : null) ?? null
+  const compareCommitId = searchParams.get("compareCommitId")
+  const saveId = searchParams.get("saveId")
+
+  const navigate = useNavigate()
+  const [isDocumentListOpen, setIsDocumentListOpen] = useState(false)
 
   // 현재 브랜치 ID 계산
   const getCurrentBranchId = () => {
@@ -124,6 +129,27 @@ export default function DocumentDetailPage() {
     }
   }
 
+  // 브랜치 삭제 mutation
+  const deleteBranchMutation = useMutation({
+    mutationFn: async ({
+      documentId,
+      branchId,
+    }: { documentId: number; branchId: number }) => {
+      await apiClient.branch.deleteBranch({
+        documentId,
+        branchId,
+      })
+    },
+    onSuccess: () => {
+      // 삭제 성공 시 페이지 리로드
+      window.location.reload()
+    },
+    onError: (error) => {
+      console.error("브랜치 삭제 중 오류:", error)
+      alertDialog("브랜치 삭제 중 오류가 발생했습니다.", "오류", "destructive")
+    },
+  })
+
   const handleBranchDelete = async (branchId: number) => {
     if (!graphData) return
 
@@ -148,29 +174,11 @@ export default function DocumentDetailPage() {
       return
     }
 
-    try {
-      // TODO: 실제 API 호출
-      // await deleteBranch(branchId)
-
-      // 임시로 콘솔 로그
-      console.log(`브랜치 '${branch.name}'이 삭제되었습니다.`)
-      await alertDialog(`브랜치 '${branch.name}'이 삭제되었습니다.`, "알림")
-
-      // 삭제된 브랜치가 현재 브랜치였다면 메인으로 리다이렉트
-      const currentCommit = graphData.commits.find(
-        (c) => c.id.toString() === commitId,
-      )
-      if (currentCommit?.branchId === branchId) {
-        navigate(`/documents/${documentId}`)
-      }
-    } catch (error) {
-      console.error("브랜치 삭제 중 오류:", error)
-      await alertDialog(
-        "브랜치 삭제 중 오류가 발생했습니다.",
-        "오류",
-        "destructive",
-      )
-    }
+    // 브랜치 삭제 API 호출
+    deleteBranchMutation.mutate({
+      documentId: Number.parseInt(documentId),
+      branchId,
+    })
   }
 
   // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시
@@ -178,21 +186,17 @@ export default function DocumentDetailPage() {
     return <Loading text="문서를 불러오는 중..." />
   }
 
-  // if (graphError) {
-  //   return (
-  //     <div className="flex items-center justify-center h-screen">
-  //       <div className="text-center">
-  //         <h2 className="text-xl font-semibold text-red-600 mb-2">
-  //           오류가 발생했습니다
-  //         </h2>
-  //         <p className="text-gray-600">문서를 불러올 수 없습니다.</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
-  if (!graphData) {
-    return <Loading text="문서를 불러오는 중..." />
+  if (graphError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">
+            오류가 발생했습니다
+          </h2>
+          <p className="text-gray-600">문서를 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    )
   }
 
   return (
