@@ -43,7 +43,11 @@ export default function DocumentDetailPage() {
   const modeParam = searchParams.get("mode")
   const mode = (modeParam as DocumentMode) ?? "commit"
   const commitId =
-    searchParams.get("commitId") ?? mainBranch?.leafCommitId?.toString() ?? null
+    mode === "save"
+      ? null
+      : (searchParams.get("commitId") ??
+        mainBranch?.leafCommitId?.toString() ??
+        null)
   const compareCommitId = searchParams.get("compareCommitId")
   const saveId = searchParams.get("saveId")
 
