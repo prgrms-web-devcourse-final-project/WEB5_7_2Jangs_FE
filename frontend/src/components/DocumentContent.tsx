@@ -11,6 +11,7 @@ import { useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { useDialog, alertDialog } from "./ui/alert-dialog"
+import { useNavigate } from "react-router"
 
 export default function DocumentContent({
   documentMode,
@@ -44,6 +45,8 @@ export default function DocumentContent({
     isOpen: boolean
     mode: "save" | "commit"
   }>({ isOpen: false, mode: "save" })
+
+  const navigate = useNavigate()
 
   // API 데이터를 OutputData로 변환하는 함수
   const convertToEditorData = (data: any): OutputData => {
@@ -173,7 +176,13 @@ export default function DocumentContent({
     if (modalState.mode === "save") {
       saveMutation.mutate({ content })
     } else {
-      commitMutation.mutate({ title, description, content })
+      const res = await commitMutation.mutateAsync({
+        title,
+        description,
+        content,
+      })
+
+      navigate(`/documents/${documentId}?mode=commit&commitId=${res.id}`)
     }
   }
 
