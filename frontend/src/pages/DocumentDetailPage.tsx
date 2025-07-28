@@ -43,9 +43,7 @@ export default function DocumentDetailPage() {
   const modeParam = searchParams.get("mode")
   const mode = (modeParam as DocumentMode) ?? "commit"
   const commitId =
-    ((searchParams.get("commitId") ?? mode === "commit")
-      ? mainBranch?.leafCommitId?.toString()
-      : null) ?? null
+    searchParams.get("commitId") ?? mainBranch?.leafCommitId?.toString() ?? null
   const compareCommitId = searchParams.get("compareCommitId")
   const saveId = searchParams.get("saveId")
 
@@ -170,9 +168,7 @@ export default function DocumentDetailPage() {
       setIsBranchEditModalOpen(false)
       setBranchEditData(null)
 
-      navigate(
-        `/documents/${documentId}?mode=edit&commitId=${commitId}&branchId=${result.branchId}&saveId=${result.saveId}`,
-      )
+      navigate(`/documents/${documentId}?mode=save&saveId=${result.saveId}`)
 
       window.location.reload()
     } catch (error) {

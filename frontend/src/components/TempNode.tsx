@@ -132,23 +132,6 @@ const TempNode = React.memo(function TempNode({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* 개별 노드의 Tooltip */}
-      {!openDropdownId && hoveredTemp && (
-        <div
-          className="fixed z-50 bg-gray-800 text-white text-xs p-2 rounded shadow-lg pointer-events-none"
-          style={{
-            left: hoveredTemp.position.x,
-            top: hoveredTemp.position.y,
-          }}
-        >
-          <div className="font-semibold">{hoveredTemp.tempData.title}</div>
-          <div className="text-gray-300">
-            {hoveredTemp.tempData.description}
-          </div>
-          <div className="text-gray-400 text-xs mt-1">임시 저장</div>
-        </div>
-      )}
     </>
   )
 })
