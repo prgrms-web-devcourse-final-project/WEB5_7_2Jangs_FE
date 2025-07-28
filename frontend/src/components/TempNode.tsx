@@ -38,13 +38,6 @@ const TempNode = React.memo(function TempNode({
   openDropdownId,
   setOpenDropdownId,
 }: TempNodeProps) {
-  console.log("TempNode", tempId)
-  // 개별 노드의 hover 상태 관리
-  const [hoveredTemp, setHoveredTemp] = useState<{
-    tempData: { tempId: number; title: string; description: string }
-    position: { x: number; y: number }
-  } | null>(null)
-
   return (
     <>
       {/* React Flow Handles for connections */}
@@ -91,25 +84,16 @@ const TempNode = React.memo(function TempNode({
             style={{ width: GRAPH_LAYOUT.NODE_WIDTH }}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            onMouseEnter={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect()
-              setHoveredTemp({
-                tempData: { tempId, title, description },
-                position: {
-                  x: rect.left,
-                  y: rect.bottom + 8,
-                },
-              })
-            }}
-            onMouseLeave={() => setHoveredTemp(null)}
           >
-            <div className="font-semibold text-sm truncate text-gray-700">
-              {title}
-            </div>
-            <div className="text-xs text-gray-600 mt-1 truncate">
+            <div className="text-xs text-gray-600 mt-1 truncate invisible">
               {description}
             </div>
-            <div className="text-xs text-gray-500 mt-2 italic">임시 저장됨</div>
+            <div className="font-semibold text-sm truncate text-gray-700">
+              임시 저장
+            </div>
+            <div className="text-xs text-gray-500 mt-2 italic invisible">
+              임시 저장됨
+            </div>
             <div
               className="text-xs mt-2 px-2 py-1 rounded-full inline-block text-white opacity-80"
               style={{ backgroundColor: color }}
