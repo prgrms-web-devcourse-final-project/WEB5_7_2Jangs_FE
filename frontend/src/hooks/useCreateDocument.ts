@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
+import { alertDialog } from "@/lib/utils"
 
 export function useCreateDocument() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -32,9 +33,29 @@ export function useCreateDocument() {
 
       console.log("새 문서 생성됨:", response)
     },
-    onError: (error) => {
+    onError: async (error: any) => {
       console.error("문서 생성 실패:", error)
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "문서 생성에 실패했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
       // 여기서 토스트 알림이나 에러 처리를 할 수 있습니다
+      alertDialog(errorMessage, "문서 생성 오류", "destructive")
     },
   })
 

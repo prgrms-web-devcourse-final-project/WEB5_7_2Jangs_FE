@@ -1,9 +1,11 @@
-import type { OutputData } from "@editorjs/editorjs"
-import { useNavigate, useSearchParams } from "react-router"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import ResizableLayout from "@/layouts/ResizableLayout"
 import DocumentMergeView from "@/components/DocumentMergeView"
-import Loading from "@/components/Loading"
+import { useQuery, useMutation } from "@tanstack/react-query"
+import { useSearchParams, useNavigate } from "react-router"
 import { apiClient } from "@/api/apiClient"
+import type { OutputData } from "@editorjs/editorjs"
+import Loading from "@/components/Loading"
+import { alertDialog } from "@/lib/utils"
 
 export default function MergePage() {
   const [searchParams] = useSearchParams()
@@ -56,10 +58,29 @@ export default function MergePage() {
       // 성공 후 문서 상세 페이지로 이동
       navigate(`/documents/${documentId}`)
     },
-    onError: (error) => {
+    onError: async (error: any) => {
       console.error("Merge failed:", error)
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "병합 중 오류가 발생했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
       // 에러 처리 (추후 toast 등으로 개선 가능)
-      alert("병합 중 오류가 발생했습니다.")
+      alertDialog(errorMessage, "병합 오류", "destructive")
     },
   })
 

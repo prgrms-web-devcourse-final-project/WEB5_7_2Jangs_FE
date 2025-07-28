@@ -97,9 +97,28 @@ export default function DocumentContent({
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "save" })
     },
-    onError: async (error) => {
+    onError: async (error: any) => {
       console.error("저장 실패:", error)
-      await alertDialog("저장에 실패했습니다.", "오류", "destructive")
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "저장에 실패했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
+      await alertDialog(errorMessage, "오류", "destructive")
     },
   })
 
@@ -132,9 +151,28 @@ export default function DocumentContent({
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "commit" })
     },
-    onError: async (error) => {
+    onError: async (error: any) => {
       console.error("커밋 실패:", error)
-      await alertDialog("커밋에 실패했습니다.", "오류", "destructive")
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "커밋에 실패했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
+      await alertDialog(errorMessage, "오류", "destructive")
     },
   })
 

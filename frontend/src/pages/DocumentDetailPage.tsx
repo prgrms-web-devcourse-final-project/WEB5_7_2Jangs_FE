@@ -143,6 +143,7 @@ export default function DocumentDetailPage() {
       }
       case "commit-delete":
         // 삭제처리
+        handleCommitDelete(idByType)
         break
       case "temp-edit":
         console.log("temp-edit", idByType)
@@ -196,9 +197,68 @@ export default function DocumentDetailPage() {
       // 삭제 성공 시 페이지 리로드
       window.location.reload()
     },
-    onError: (error) => {
+    onError: async (error: any) => {
       console.error("브랜치 삭제 중 오류:", error)
-      alertDialog("브랜치 삭제 중 오류가 발생했습니다.", "오류", "destructive")
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "브랜치 삭제 중 오류가 발생했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
+      alertDialog(errorMessage, "오류", "destructive")
+    },
+  })
+
+  // 커밋 삭제 mutation
+  const deleteCommitMutation = useMutation({
+    mutationFn: async ({
+      docId,
+      commitId,
+    }: { docId: number; commitId: number }) => {
+      await apiClient.commit.deleteCommit({
+        docId,
+        commitId,
+      })
+    },
+    onSuccess: () => {
+      // 삭제 성공 시 페이지 리로드
+      window.location.reload()
+    },
+    onError: async (error: any) => {
+      console.error("커밋 삭제 중 오류:", error)
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "커밋 삭제 중 오류가 발생했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
+      alertDialog(errorMessage, "오류", "destructive")
     },
   })
 
@@ -230,6 +290,31 @@ export default function DocumentDetailPage() {
     deleteBranchMutation.mutate({
       documentId: Number.parseInt(documentId),
       branchId,
+    })
+  }
+
+  const handleCommitDelete = async (commitId: number) => {
+    if (!graphData) return
+
+    console.log("Commit delete:", commitId)
+
+    const commit = graphData.commits.find((c) => c.id === commitId)
+    if (!commit) return
+
+    // 확인 다이얼로그 표시
+    const confirmed = await confirm(
+      "이 커밋을 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.\n\n참고: 각 브랜치의 최신 커밋만 삭제 가능합니다.",
+      "커밋 삭제",
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    // 커밋 삭제 API 호출
+    deleteCommitMutation.mutate({
+      docId: Number.parseInt(documentId),
+      commitId,
     })
   }
 

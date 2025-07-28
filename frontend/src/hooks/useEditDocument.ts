@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
+import { alertDialog } from "@/lib/utils"
 import type { Document } from "@/mock/DocumentList"
 
 interface UseEditDocumentProps {
@@ -16,7 +17,7 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
   // React Query Mutation을 사용한 문서 제목 수정
   const editTitleMutation = useMutation({
     mutationFn: async ({ docId, title }: { docId: number; title: string }) => {
-      return await apiClient.document.updateDocumentTitle({
+      return await apiClient.document.rename({
         docId,
         docTitleRequest: { title },
       })
@@ -42,9 +43,29 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
 
       console.log("문서 제목 수정 완료:", response)
     },
-    onError: (error) => {
+    onError: async (error: any) => {
       console.error("제목 수정 실패:", error)
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "제목 수정에 실패했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
       // 여기서 토스트 알림이나 에러 처리를 할 수 있습니다
+      alertDialog(errorMessage, "제목 수정 오류", "destructive")
     },
   })
 
