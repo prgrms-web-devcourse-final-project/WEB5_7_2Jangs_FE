@@ -17,8 +17,6 @@ import * as runtime from '../runtime';
 import type {
   CommitGraphResponse,
   DocCreateResponse,
-  DocListResponse,
-  DocListSimpleResponse,
   DocTitleRequest,
   ErrorResponse,
 } from '../models/index';
@@ -27,10 +25,6 @@ import {
     CommitGraphResponseToJSON,
     DocCreateResponseFromJSON,
     DocCreateResponseToJSON,
-    DocListResponseFromJSON,
-    DocListResponseToJSON,
-    DocListSimpleResponseFromJSON,
-    DocListSimpleResponseToJSON,
     DocTitleRequestFromJSON,
     DocTitleRequestToJSON,
     ErrorResponseFromJSON,
@@ -203,7 +197,7 @@ export class DocumentAPIApi extends runtime.BaseAPI {
      * 로그인한 사용자의 문서 목록을 페이지네이션과 정렬 옵션에 따라 조회합니다. 정렬 필드는 기본적으로 updatedAt이며, order는 desc가 기본값입니다. 
      * 전체 문서 목록 조회
      */
-    async readListRaw(requestParameters: ReadListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocListResponse>> {
+    async readListRaw(requestParameters: ReadListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         const queryParameters: any = {};
 
         if (requestParameters['sort'] != null) {
@@ -234,14 +228,18 @@ export class DocumentAPIApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => DocListResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * 로그인한 사용자의 문서 목록을 페이지네이션과 정렬 옵션에 따라 조회합니다. 정렬 필드는 기본적으로 updatedAt이며, order는 desc가 기본값입니다. 
      * 전체 문서 목록 조회
      */
-    async readList(requestParameters: ReadListRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DocListResponse> {
+    async readList(requestParameters: ReadListRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.readListRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -250,7 +248,7 @@ export class DocumentAPIApi extends runtime.BaseAPI {
      * 사이드바에 표시할 요약된 문서 목록을 조회합니다. 기본 정렬은 updatedAt, 기본 정렬 순서는 desc입니다. 
      * 사이드바용 문서 목록 조회
      */
-    async readListSidebarRaw(requestParameters: ReadListSidebarRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocListSimpleResponse>> {
+    async readListSidebarRaw(requestParameters: ReadListSidebarRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         const queryParameters: any = {};
 
         if (requestParameters['sort'] != null) {
@@ -281,14 +279,18 @@ export class DocumentAPIApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => DocListSimpleResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * 사이드바에 표시할 요약된 문서 목록을 조회합니다. 기본 정렬은 updatedAt, 기본 정렬 순서는 desc입니다. 
      * 사이드바용 문서 목록 조회
      */
-    async readListSidebar(requestParameters: ReadListSidebarRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DocListSimpleResponse> {
+    async readListSidebar(requestParameters: ReadListSidebarRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.readListSidebarRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -346,7 +348,7 @@ export class DocumentAPIApi extends runtime.BaseAPI {
      * 로그인한 사용자의 문서 중 제목에 해당 키워드가 포함된 문서를 검색합니다. 검색 결과는 페이지네이션 및 정렬 조건(`sort`, `order`)에 따라 반환됩니다. 기본 정렬 필드는 `updatedAt`, 정렬 순서는 `desc`입니다. 
      * 문서 제목 검색
      */
-    async searchRaw(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DocListResponse>> {
+    async searchRaw(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         if (requestParameters['keyword'] == null) {
             throw new runtime.RequiredError(
                 'keyword',
@@ -388,14 +390,18 @@ export class DocumentAPIApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => DocListResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * 로그인한 사용자의 문서 중 제목에 해당 키워드가 포함된 문서를 검색합니다. 검색 결과는 페이지네이션 및 정렬 조건(`sort`, `order`)에 따라 반환됩니다. 기본 정렬 필드는 `updatedAt`, 정렬 순서는 `desc`입니다. 
      * 문서 제목 검색
      */
-    async search(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DocListResponse> {
+    async search(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.searchRaw(requestParameters, initOverrides);
         return await response.value();
     }

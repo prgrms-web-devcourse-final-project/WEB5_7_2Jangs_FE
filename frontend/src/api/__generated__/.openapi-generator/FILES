@@ -19,8 +19,6 @@ models/CompareMergeCommitResponse.ts
 models/CreateCommitRequest.ts
 models/CreateCommitResponse.ts
 models/DocCreateResponse.ts
-models/DocListResponse.ts
-models/DocListSimpleResponse.ts
 models/DocTitleRequest.ts
 models/ErrorResponse.ts
 models/GraphBranchDto.ts
@@ -29,7 +27,6 @@ models/GraphEdgeDto.ts
 models/MergeCommitRequest.ts
 models/PasswordResetRequest.ts
 models/PwdResetCodeRequest.ts
-models/RecentActivityDto.ts
 models/SaveGetResponse.ts
 models/SaveUpdateRequest.ts
 models/SaveUpdateResponse.ts
