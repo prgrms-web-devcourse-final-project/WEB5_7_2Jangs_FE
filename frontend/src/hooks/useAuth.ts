@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null)
       }
     } catch (error) {
-      console.error("세션 체크 실패:", error)
       setUser(null)
     } finally {
       setIsLoading(false)

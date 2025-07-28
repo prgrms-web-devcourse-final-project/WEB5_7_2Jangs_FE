@@ -13,7 +13,7 @@
  */
 
 
-export const BASE_PATH = "http://3.34.159.207:8080".replace(/\/+$/, "");
+export const BASE_PATH = "https://docsa.kro.kr".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path

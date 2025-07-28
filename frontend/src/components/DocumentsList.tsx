@@ -21,11 +21,13 @@ export default function DocumentsList() {
   const {
     documents,
     searchQuery,
-    setSearchQuery,
+    inputValue,
+    setInputValue,
+    handleSearch,
+    handleResetSearch,
     viewMode,
     toggleViewMode,
     isLoading,
-    filteredDocuments,
     sort,
     setSort,
     order,
@@ -60,7 +62,10 @@ export default function DocumentsList() {
         {/* 검색 및 새 문서 생성 */}
         <SearchAndCreateBar
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          handleSearch={handleSearch}
+          handleResetSearch={handleResetSearch}
           viewMode={viewMode}
           toggleViewMode={toggleViewMode}
           onCreateClick={createDocument.openCreateModal}
@@ -72,7 +77,7 @@ export default function DocumentsList() {
 
         {/* 문서 리스트 */}
         <DocumentsGrid
-          documents={filteredDocuments}
+          documents={documents}
           viewMode={viewMode}
           searchQuery={searchQuery}
           onDocumentClick={handleDocumentClick}

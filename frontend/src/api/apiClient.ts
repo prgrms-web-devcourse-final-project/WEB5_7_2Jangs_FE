@@ -2,9 +2,9 @@ import {
   UserAPIApi,
   AuthApi,
   BranchAPIApi,
-  CommitControllerApi,
+  CommitAPIApi,
   Configuration,
-  DocControllerApi,
+  DocumentAPIApi,
   SaveAPIApi,
 } from "./__generated__"
 
@@ -33,7 +33,7 @@ export const apiClient = {
   auth: new AuthApi(config),
   user: new UserAPIApi(config),
   branch: new BranchAPIApi(config),
-  commit: new CommitControllerApi(config),
-  document: new DocControllerApi(config),
+  commit: new CommitAPIApi(config),
+  document: new DocumentAPIApi(config),
   save: new SaveAPIApi(config),
 }
