@@ -86,9 +86,7 @@ export function useDocuments() {
   // InfiniteData를 평면 배열로 변환
   const documents = useMemo(() => {
     if (!data) return []
-    return data.pages.flatMap((page) =>
-      (page.content ?? []).map(transformDocListResponse),
-    )
+    return data.pages.flatMap((page) => page.content ?? [])
   }, [data])
 
   const totalCount = data?.pages[0]?.totalElements ?? 0

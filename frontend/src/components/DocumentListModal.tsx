@@ -28,8 +28,8 @@ interface DocumentListModalProps {
 interface DocumentItem {
   id: number
   title: string
-  createdAt: string
-  updatedAt: string
+  createdAt: string | Date
+  updatedAt: string | Date
   recent: {
     recentType: RecentActivityDtoRecentTypeEnum
     recentTypeId: number

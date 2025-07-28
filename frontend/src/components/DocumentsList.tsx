@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router"
 import Loading from "./Loading"
-import type { Document } from "@/mock/DocumentList"
 
 // Custom Hooks
 import { useDocuments } from "@/hooks/useDocuments"
@@ -14,6 +13,7 @@ import DocumentsGrid from "./documents/DocumentsGrid"
 import CreateDocumentModal from "./documents/CreateDocumentModal"
 import EditDocumentModal from "./documents/EditDocumentModal"
 import DeleteDocumentDialog from "./documents/DeleteDocumentDialog"
+import type { DocListResponse } from "@/api/__generated__"
 
 export default function DocumentsList() {
   const navigate = useNavigate()
@@ -41,9 +41,9 @@ export default function DocumentsList() {
   const deleteDocument = useDeleteDocument()
 
   // 문서 클릭 핸들러
-  const handleDocumentClick = (doc: Document) => {
+  const handleDocumentClick = (doc: DocListResponse) => {
     console.log(`문서 ${doc.id} 열기`)
-    const { recentType, recentTypeId } = doc.recent
+    const { recentType, recentTypeId } = doc.recent || {}
     if (recentType === "SAVE") {
       navigate(`/documents/${doc.id}?mode=save&saveId=${recentTypeId}`)
     } else if (recentType === "COMMIT") {

@@ -1,14 +1,14 @@
 import { FileText } from "lucide-react"
-import type { Document } from "@/mock/DocumentList"
 import DocumentCard from "./DocumentCard"
+import type { DocListResponse } from "@/api/__generated__"
 
 interface DocumentsGridProps {
-  documents: Document[]
+  documents: DocListResponse[]
   viewMode: "grid" | "list"
   searchQuery: string
-  onDocumentClick: (doc: Document) => void
+  onDocumentClick: (doc: DocListResponse) => void
   onEditTitle: (id: number) => void
-  onDeleteDocument: (doc: Document) => void
+  onDeleteDocument: (doc: DocListResponse) => void
 }
 
 export default function DocumentsGrid({

@@ -1,5 +1,8 @@
-export const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
+export const formatDate = (dateString?: string | Date) => {
+  if (!dateString) return ""
+
+  const date =
+    typeof dateString === "string" ? new Date(dateString) : dateString
   return date
     .toLocaleDateString("ko-KR", {
       year: "numeric",
@@ -10,8 +13,10 @@ export const formatDate = (dateString: string) => {
     .replace(/\.$/, "")
 }
 
-export const formatDateForDocuments = (dateString: string) => {
-  const date = new Date(dateString)
+export const formatDateForDocuments = (dateInput?: string | Date) => {
+  if (!dateInput) return ""
+
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput
   const now = new Date()
   const diffTime = Math.abs(now.getTime() - date.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))

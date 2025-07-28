@@ -7,15 +7,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FileText, MoreVertical, Edit, Trash2 } from "lucide-react"
-import type { Document } from "@/mock/DocumentList"
 import { formatDate, formatDateForDocuments } from "@/lib/date"
+import type { DocListResponse } from "@/api/__generated__"
 
 interface DocumentCardProps {
-  document: Document
+  document: DocListResponse
   viewMode: "grid" | "list"
-  onDocumentClick: (doc: Document) => void
+  onDocumentClick: (doc: DocListResponse) => void
   onEditTitle: (id: number) => void
-  onDeleteDocument: (doc: Document) => void
+  onDeleteDocument: (doc: DocListResponse) => void
 }
 
 export default function DocumentCard({
@@ -73,6 +73,8 @@ export default function DocumentCard({
                 <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem
                     onClick={(e) => {
+                      if (!document.id) return
+
                       e.stopPropagation()
                       onEditTitle(document.id)
                     }}
@@ -134,6 +136,7 @@ export default function DocumentCard({
                 <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem
                     onClick={(e) => {
+                      if (!document.id) return
                       e.stopPropagation()
                       onEditTitle(document.id)
                     }}

@@ -2,15 +2,17 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
 import { alertDialog } from "@/lib/utils"
-import type { Document } from "@/mock/DocumentList"
+import type { DocListResponse } from "@/api/__generated__"
 
 interface UseEditDocumentProps {
-  documents: Document[]
+  documents: DocListResponse[]
 }
 
 export function useEditDocument({ documents }: UseEditDocumentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [documentToEdit, setDocumentToEdit] = useState<Document | null>(null)
+  const [documentToEdit, setDocumentToEdit] = useState<DocListResponse | null>(
+    null,
+  )
   const [editTitle, setEditTitle] = useState("")
   const queryClient = useQueryClient()
 
@@ -26,7 +28,7 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
       // 성공 시 문서 목록 캐시 업데이트
       queryClient.setQueryData(
         ["documents"],
-        (oldData: Document[] | undefined) => {
+        (oldData: DocListResponse[] | undefined) => {
           if (!oldData) return oldData
           return oldData.map((doc) =>
             doc.id === variables.docId
@@ -72,7 +74,7 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
   const handleEditTitle = (id: number) => {
     console.log(`문서 ${id} 제목 수정`)
     const docToEdit = documents.find((doc) => doc.id === id)
-    if (docToEdit) {
+    if (docToEdit?.title) {
       setDocumentToEdit(docToEdit)
       setEditTitle(docToEdit.title)
       setShowEditDialog(true)
@@ -80,7 +82,7 @@ export function useEditDocument({ documents }: UseEditDocumentProps) {
   }
 
   const confirmEditTitle = async () => {
-    if (!documentToEdit || !editTitle.trim()) return
+    if (!documentToEdit || !documentToEdit.id || !editTitle.trim()) return
 
     editTitleMutation.mutate({
       docId: documentToEdit.id,

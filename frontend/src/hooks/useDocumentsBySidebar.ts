@@ -13,12 +13,8 @@ function transformDocListSimpleResponse(apiDoc: DocListSimpleResponse) {
   return {
     id: apiDoc.id || 0,
     title: apiDoc.title || "제목 없음",
-    createdAt: apiDoc.createdAt
-      ? apiDoc.createdAt.toISOString()
-      : new Date().toISOString(),
-    updatedAt: apiDoc.updatedAt
-      ? apiDoc.updatedAt.toISOString()
-      : new Date().toISOString(),
+    createdAt: apiDoc.createdAt || new Date().toISOString(),
+    updatedAt: apiDoc.updatedAt || new Date().toISOString(),
     recent: {
       recentType: apiDoc.recent?.recentType || "SAVE",
       recentTypeId: apiDoc.recent?.recentTypeId || 0,
