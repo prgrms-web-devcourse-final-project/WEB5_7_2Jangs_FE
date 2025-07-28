@@ -306,6 +306,8 @@ export default function DocumentDetailPage() {
       docId: Number.parseInt(documentId),
       commitId,
     })
+
+    navigate(`/documents/${documentId}`)
   }
 
   // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시

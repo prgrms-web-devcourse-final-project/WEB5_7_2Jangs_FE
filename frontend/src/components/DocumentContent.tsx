@@ -9,6 +9,7 @@ import { Button } from "./ui/button"
 import { apiClient } from "@/api/apiClient"
 import { useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { calculateBlockDiff } from "@/lib/diffUtils"
 
 import { useDialog, alertDialog } from "./ui/alert-dialog"
 import { useNavigate } from "react-router"
@@ -127,21 +128,21 @@ export default function DocumentContent({
     mutationFn: async ({
       title,
       description,
-      content,
+      blocks,
+      blockOrders,
     }: {
       title: string
       description?: string
-      content: any[]
+      blocks: any[]
+      blockOrders: string[]
     }) => {
       return await apiClient.commit.createCommit({
         docId: documentId,
         createCommitRequest: {
           title,
           description,
-          blocks: content.map((block) => ({ data: block })),
-          blockOrders: content.map(
-            (block, index) => block.id ?? index.toString(),
-          ),
+          blocks: blocks.map((block) => ({ data: block })),
+          blockOrders: blockOrders,
           branchId,
         },
       })
@@ -214,10 +215,28 @@ export default function DocumentContent({
     if (modalState.mode === "save") {
       saveMutation.mutate({ content })
     } else {
+      // 원본 데이터와 현재 데이터를 비교하여 변경된 블록만 추출
+      const originalEditorData = convertToEditorData(originalData)
+      const blockDiffs = calculateBlockDiff(originalEditorData, currentData)
+
+      // 추가되거나 수정된 블록만 필터링
+      const changedBlocks: any[] = []
+      for (const diff of blockDiffs) {
+        if (diff.type === "added" || diff.type === "modified") {
+          const block = diff.newBlock || diff.block
+          if (block) {
+            changedBlocks.push(block)
+          }
+        }
+      }
+
       const res = await commitMutation.mutateAsync({
         title,
         description,
-        content,
+        blocks: changedBlocks,
+        blockOrders: content.map(
+          (block, index) => block.id ?? index.toString(),
+        ),
       })
 
       navigate(`/documents/${documentId}?mode=commit&commitId=${res.id}`)
