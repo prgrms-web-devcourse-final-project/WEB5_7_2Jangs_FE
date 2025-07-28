@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
 import { useAuth } from "./useAuth"
 import type { DocListResponse } from "@/api/__generated__"
 import type { PageDocListResponse } from "@/api/__generated__/models/PageDocListResponse"
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 12
 
 type Sort = "title" | "updatedAt"
 type Order = "asc" | "desc"
@@ -30,6 +30,7 @@ export function useDocuments() {
   const [inputValue, setInputValue] = useState("") // input의 내부 값을 관리
   const [sort, setSort] = useState<Sort>("updatedAt")
   const [order, setOrder] = useState<Order>("desc")
+  const [currentPage, setCurrentPage] = useState(0) // 페이지는 0부터 시작
   const { isAuthenticated } = useAuth()
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -37,59 +38,100 @@ export function useDocuments() {
   // 검색 실행 함수
   const handleSearch = () => {
     setSearchQuery(inputValue.trim())
+    setCurrentPage(0) // 검색 시 첫 페이지로 이동
   }
 
   // 검색 초기화 함수
   const handleResetSearch = () => {
     setInputValue("")
     setSearchQuery("")
+    setCurrentPage(0) // 검색 초기화 시 첫 페이지로 이동
   }
 
-  const { data, isLoading, error, refetch, hasNextPage, fetchNextPage } =
-    useInfiniteQuery({
-      queryKey: ["documents", sort, order, searchQuery], // searchQuery를 queryKey에 추가
-      queryFn: async ({ pageParam }: { pageParam: number }) => {
-        // 검색 쿼리가 있으면 search API 사용, 없으면 readList API 사용
-        if (searchQuery.trim()) {
-          const response = await apiClient.document.search({
-            keyword: searchQuery.trim(),
-            page: pageParam,
-            sort: sort,
-            order: order,
-            size: PAGE_SIZE,
-          })
-          // 실제로는 PageDocListResponse를 반환하므로 타입 단언 사용
-          return response as unknown as PageDocListResponse
-        } else {
-          const response = await apiClient.document.readList({
-            page: pageParam,
-            sort: sort,
-            order: order,
-            size: PAGE_SIZE,
-          })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["documents", sort, order, searchQuery, currentPage],
+    queryFn: async () => {
+      // 검색 쿼리가 있으면 search API 사용, 없으면 readList API 사용
+      if (searchQuery.trim()) {
+        const response = await apiClient.document.search({
+          keyword: searchQuery.trim(),
+          page: currentPage,
+          sort: sort,
+          order: order,
+          size: PAGE_SIZE,
+        })
+        return response as unknown as PageDocListResponse
+      } else {
+        const response = await apiClient.document.readList({
+          page: currentPage,
+          sort: sort,
+          order: order,
+          size: PAGE_SIZE,
+        })
+        return response as unknown as PageDocListResponse
+      }
+    },
+    enabled: isAuthenticated,
+  })
 
-          // 실제로는 PageDocListResponse를 반환하므로 타입 단언 사용
-          return response as unknown as PageDocListResponse
-        }
-      },
-      getNextPageParam: (lastPage) => {
-        // 마지막 페이지가 아니면 다음 페이지 번호 반환
-        if (lastPage?.last === false) {
-          return lastPage.pageable?.pageNumber ?? 0 + 1
-        }
-        return 0
-      },
-      initialPageParam: 0,
-      enabled: isAuthenticated,
-    })
-
-  // InfiniteData를 평면 배열로 변환
+  // 문서 목록
   const documents = useMemo(() => {
-    if (!data) return []
-    return data.pages.flatMap((page) => page.content ?? [])
+    return data?.content ?? []
   }, [data])
 
-  const totalCount = data?.pages[0]?.totalElements ?? 0
+  // 페이지네이션 정보
+  const pagination = useMemo(() => {
+    if (!data) {
+      return {
+        currentPage: 0,
+        totalPages: 0,
+        totalElements: 0,
+        isFirst: true,
+        isLast: true,
+        hasNext: false,
+        hasPrevious: false,
+      }
+    }
+
+    return {
+      currentPage: data.number ?? 0,
+      totalPages: data.totalPages ?? 0,
+      totalElements: data.totalElements ?? 0,
+      isFirst: data.first ?? true,
+      isLast: data.last ?? true,
+      hasNext: !data.last,
+      hasPrevious: !data.first,
+    }
+  }, [data])
+
+  // 페이지 변경 함수
+  const goToPage = (page: number) => {
+    if (page >= 0 && page < pagination.totalPages) {
+      setCurrentPage(page)
+    }
+  }
+
+  const goToNextPage = () => {
+    if (pagination.hasNext) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  const goToPreviousPage = () => {
+    if (pagination.hasPrevious) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goToFirstPage = () => {
+    setCurrentPage(0)
+  }
+
+  const goToLastPage = () => {
+    if (pagination.totalPages > 0) {
+      setCurrentPage(pagination.totalPages - 1)
+    }
+  }
 
   const toggleViewMode = () => {
     setViewMode(viewMode === "grid" ? "list" : "grid")
@@ -101,9 +143,14 @@ export function useDocuments() {
     isLoading,
     error,
     refetch,
-    hasNextPage,
-    fetchNextPage,
-    totalCount,
+    // Pagination
+    pagination,
+    currentPage,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
+    goToFirstPage,
+    goToLastPage,
     // Search functionality
     searchQuery,
     inputValue,

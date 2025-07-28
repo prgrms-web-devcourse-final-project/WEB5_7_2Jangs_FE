@@ -13,6 +13,15 @@ import DocumentsGrid from "./documents/DocumentsGrid"
 import CreateDocumentModal from "./documents/CreateDocumentModal"
 import EditDocumentModal from "./documents/EditDocumentModal"
 import DeleteDocumentDialog from "./documents/DeleteDocumentDialog"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import type { DocListResponse } from "@/api/__generated__"
 
 export default function DocumentsList() {
@@ -32,6 +41,10 @@ export default function DocumentsList() {
     setSort,
     order,
     setOrder,
+    pagination,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
   } = useDocuments()
 
   const createDocument = useCreateDocument()
@@ -49,6 +62,54 @@ export default function DocumentsList() {
     } else if (recentType === "COMMIT") {
       navigate(`/documents/${doc.id}?mode=commit&saveId=${recentTypeId}`)
     }
+  }
+
+  // 페이지네이션 범위 계산
+  const generatePageNumbers = () => {
+    const { currentPage, totalPages } = pagination
+    const pages: (number | "ellipsis")[] = []
+    const maxVisible = 5 // 보여줄 최대 페이지 수
+
+    if (totalPages <= maxVisible) {
+      // 전체 페이지가 적으면 모두 표시
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // 첫 페이지와 마지막 페이지는 항상 표시
+      pages.push(0)
+
+      if (currentPage <= 2) {
+        // 현재 페이지가 앞쪽에 있을 때
+        for (let i = 1; i < 4; i++) {
+          pages.push(i)
+        }
+        if (totalPages > 4) {
+          pages.push("ellipsis")
+        }
+      } else if (currentPage >= totalPages - 3) {
+        // 현재 페이지가 뒤쪽에 있을 때
+        if (totalPages > 4) {
+          pages.push("ellipsis")
+        }
+        for (let i = totalPages - 4; i < totalPages - 1; i++) {
+          if (i > 0) pages.push(i)
+        }
+      } else {
+        // 현재 페이지가 중간에 있을 때
+        pages.push("ellipsis")
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i)
+        }
+        pages.push("ellipsis")
+      }
+
+      if (totalPages > 1) {
+        pages.push(totalPages - 1)
+      }
+    }
+
+    return pages
   }
 
   if (isLoading) {
@@ -84,6 +145,64 @@ export default function DocumentsList() {
           onEditTitle={editDocument.handleEditTitle}
           onDeleteDocument={deleteDocument.deleteDocument}
         />
+
+        {/* 페이지네이션 */}
+        {pagination.totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={goToPreviousPage}
+                    className={
+                      !pagination.hasPrevious
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                {generatePageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === "ellipsis" ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => goToPage(page)}
+                        isActive={page === pagination.currentPage}
+                        className="cursor-pointer"
+                      >
+                        {page + 1}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={goToNextPage}
+                    className={
+                      !pagination.hasNext
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+
+            {/* 페이지 정보 표시 */}
+            <div className="mt-4 text-center text-sm text-gray-600">
+              총 {pagination.totalElements}개 문서 중{" "}
+              {pagination.currentPage * 10 + 1}-
+              {Math.min(
+                (pagination.currentPage + 1) * 10,
+                pagination.totalElements,
+              )}
+              개 표시
+            </div>
+          </div>
+        )}
       </main>
 
       {/* 새 문서 생성 모달 */}
