@@ -276,16 +276,6 @@ export default function DocumentDetailPage() {
       return
     }
 
-    // 확인 다이얼로그 표시
-    const confirmed = await confirm(
-      `브랜치 '${branch.name}'을(를) 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
-      "브랜치 삭제",
-    )
-
-    if (!confirmed) {
-      return
-    }
-
     // 브랜치 삭제 API 호출
     deleteBranchMutation.mutate({
       documentId: Number.parseInt(documentId),
