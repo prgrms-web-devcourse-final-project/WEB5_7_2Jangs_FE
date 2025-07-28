@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
 import { useAuth } from "./useAuth"
 import type { DocListSimpleResponse } from "@/api/__generated__"
+import type { PageDocListSimpleResponse } from "@/api/__generated__/models/PageDocListSimpleResponse"
 
 type Sort = "title" | "updatedAt"
 type Order = "asc" | "desc"
@@ -36,12 +37,19 @@ export function useDocumentsBySidebar(
   params: UseDocumentsBySidebarParams = {},
 ) {
   const { isAuthenticated } = useAuth()
+  const { sort = "updatedAt", order = "desc", page = 0, size = 10 } = params
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["documents-sidebar", params],
+    queryKey: ["documents-sidebar", { sort, order, page, size }],
     queryFn: async () => {
-      const response = await apiClient.document.readListSidebar()
-      return response
+      const response = await apiClient.document.readListSidebar({
+        sort,
+        order,
+        page,
+        size,
+      })
+      // 실제로는 PageDocListSimpleResponse를 반환하므로 타입 단언 사용
+      return response as unknown as PageDocListSimpleResponse
     },
     enabled: isAuthenticated,
   })
@@ -58,10 +66,11 @@ export function useDocumentsBySidebar(
     error,
     refetch,
     // 페이징 정보
-    totalElements: data?.totalElements,
-    totalPages: data?.totalPages,
-    currentPage: data?.number,
+    totalElements: data?.totalElements || 0,
+    totalPages: data?.totalPages || 0,
+    currentPage: data?.number || 0,
     hasNext: !data?.last,
     hasPrevious: !data?.first,
+    size,
   }
 }
