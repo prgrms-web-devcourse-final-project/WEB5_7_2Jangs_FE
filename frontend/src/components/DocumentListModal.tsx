@@ -36,7 +36,7 @@ interface DocumentItem {
   }
 }
 
-const pageSize = 10
+const pageSize = 7
 
 export default function DocumentListModal({
   open,
@@ -101,7 +101,7 @@ export default function DocumentListModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[70vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[70vh] overflow-scroll">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
