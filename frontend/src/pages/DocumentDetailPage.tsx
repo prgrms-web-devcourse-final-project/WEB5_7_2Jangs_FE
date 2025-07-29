@@ -44,13 +44,14 @@ export default function DocumentDetailPage() {
   const mode =
     (modeParam as DocumentMode) ??
     (mainBranch?.saveId ? "save" : mainBranch?.leafCommitId ? "commit" : null)
-
+  console.log("#mode", mode)
   const commitId =
     mode === "save"
       ? null
       : (searchParams.get("commitId") ??
         mainBranch?.leafCommitId?.toString() ??
         null)
+  console.log("#commitId", commitId)
   const compareCommitId = searchParams.get("compareCommitId")
   const saveId = searchParams.get("saveId") ?? mainBranch?.saveId?.toString()
 
@@ -114,7 +115,7 @@ export default function DocumentDetailPage() {
         break
       case "commit-compare": {
         if (!commitId || !idByType || commitId === idByType.toString()) {
-          console.log("here")
+          console.log("here", commitId, idByType)
           return
         }
         const comparedCommitId = idByType

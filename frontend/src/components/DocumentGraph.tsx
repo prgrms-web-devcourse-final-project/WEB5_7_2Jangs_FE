@@ -42,8 +42,8 @@ export default function DocumentGraph({
     mainBranch?.leafCommitId.toString() === activeCommitId
 
   // 이벤트 핸들러 메모이제이션
-  const handleNodeMenuClick = useCallback(onNodeMenuClick, [])
-  const handleSetOpenDropdownId = useCallback(setOpenDropdownId, [])
+  const handleNodeMenuClick = onNodeMenuClick
+  const handleSetOpenDropdownId = setOpenDropdownId
 
   // 커스텀 훅으로 노드와 엣지 데이터 생성
   const { nodes: rawNodes, edges } = useGraphRender({
