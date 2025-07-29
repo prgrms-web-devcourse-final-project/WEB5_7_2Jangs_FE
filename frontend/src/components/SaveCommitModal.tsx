@@ -46,7 +46,7 @@ export default function SaveCommitModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>기록하기</DialogTitle>
+          <DialogTitle>{mode === "save" ? "저장하기" : "기록하기"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "commit" && (
