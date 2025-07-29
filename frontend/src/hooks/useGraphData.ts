@@ -327,7 +327,7 @@ export function useGraphRender({
           })
         }
 
-        if (branch.fromCommitId) {
+        if (!branch.leafCommitId && branch.fromCommitId) {
           // 브랜치별 인덱스 계산 (좌우 방향 결정용)
           const sourceCommitBranchId = data.commits.find(
             (c) => c.id === branch.fromCommitId,
