@@ -82,6 +82,18 @@ const CommitNode = React.memo(function CommitNode({
         id="top"
         style={{ background: "#555" }}
       />
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="right"
+        style={{ background: "#555" }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        style={{ background: "#555" }}
+      />
 
       <DropdownMenu
         open={openDropdownId === commit.id.toString()}

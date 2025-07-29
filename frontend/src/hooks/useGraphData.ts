@@ -207,13 +207,26 @@ export function useGraphRender({
       let targetHandle: string | undefined
 
       if (!isSameBranch) {
+        // target 커밋과 같은 브랜치에서 더 위에 있는 노드가 있는지 확인
+        const targetDepth = commitDepths.get(edge.to) || 0
+        const hasUpperNodesInTargetBranch = data.commits.some((commit) => {
+          const commitDepth = commitDepths.get(commit.id) || 0
+          return (
+            commit.branchId === targetCommit?.branchId &&
+            commit.id !== edge.to &&
+            commitDepth < targetDepth
+          )
+        })
+
         // 타겟이 소스보다 오른쪽에 있으면 소스는 right, 타겟은 left
         if (targetBranchIndex > sourceBranchIndex) {
           sourceHandle = "right"
-          targetHandle = "top"
+          // 상위에 노드가 있으면 left, 없으면 top
+          targetHandle = hasUpperNodesInTargetBranch ? "left" : "top"
         } else {
           sourceHandle = "left"
-          targetHandle = "top"
+          // 상위에 노드가 있으면 right, 없으면 top
+          targetHandle = hasUpperNodesInTargetBranch ? "right" : "top"
         }
       }
 
@@ -235,7 +248,7 @@ export function useGraphRender({
         },
       }
     })
-  }, [data])
+  }, [data, commitDepths])
 
   const { tempNodes, tempEdges } = useMemo<{
     tempNodes: GraphNode[]
@@ -344,12 +357,30 @@ export function useGraphRender({
           let sourceHandle: string | undefined
           let targetHandle: string | undefined
 
+          // target 브랜치에서 더 위에 있는 노드가 있는지 확인 (임시 저장 노드의 경우)
+          const hasUpperNodesInTargetBranch =
+            data.commits.some((commit) => {
+              return commit.branchId === branch.id
+            }) ||
+            (branch.leafCommitId &&
+              data.commits.some((commit) => {
+                const commitDepth = commitDepths.get(commit.id) || 0
+                const leafDepth = commitDepths.get(branch.leafCommitId) || 0
+                return (
+                  commit.branchId === branch.id &&
+                  commit.id !== branch.leafCommitId &&
+                  commitDepth <= leafDepth
+                )
+              }))
+
           if (targetBranchIndex > sourceBranchIndex) {
             sourceHandle = "right"
-            targetHandle = "top"
+            // 상위에 노드가 있으면 left, 없으면 top
+            targetHandle = hasUpperNodesInTargetBranch ? "left" : "top"
           } else {
             sourceHandle = "left"
-            targetHandle = "top"
+            // 상위에 노드가 있으면 right, 없으면 top
+            targetHandle = hasUpperNodesInTargetBranch ? "right" : "top"
           }
 
           tempEdgesArray.push({
