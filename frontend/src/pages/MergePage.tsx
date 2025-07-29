@@ -52,11 +52,13 @@ export default function MergePage() {
           content,
         },
       })
+
       return response
     },
     onSuccess: () => {
       // 성공 후 문서 상세 페이지로 이동
       navigate(`/documents/${documentId}`)
+      window.location.reload()
     },
     onError: async (error: any) => {
       console.error("Merge failed:", error)
