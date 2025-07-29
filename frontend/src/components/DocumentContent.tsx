@@ -97,10 +97,13 @@ export default function DocumentContent({
         },
       })
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // 그래프 데이터만 refetch (문서 내용은 현재 편집 중인 상태 유지)
       queryClient.invalidateQueries({ queryKey: ["graphData", documentId] })
       setModalState({ isOpen: false, mode: "save" })
+
+      // 저장 완료 메시지 표시
+      await alertDialog("저장이 완료되었습니다.", "완료", "default")
     },
     onError: async (error: any) => {
       console.error("저장 실패:", error)
@@ -182,8 +185,24 @@ export default function DocumentContent({
   })
 
   // 저장하기 버튼 클릭 핸들러
-  const handleSave = () => {
-    setModalState({ isOpen: true, mode: "save" })
+  const handleSave = async () => {
+    if (!editorRef.current) {
+      await alertDialog("에디터가 준비되지 않았습니다.", "오류", "destructive")
+      return
+    }
+
+    const currentData = await editorRef.current.saveData()
+    if (!currentData) {
+      await alertDialog(
+        "현재 문서 데이터를 가져올 수 없습니다.",
+        "오류",
+        "destructive",
+      )
+      return
+    }
+
+    const content = currentData.blocks || []
+    saveMutation.mutate({ content })
   }
 
   // 기록하기 버튼 클릭 핸들러
