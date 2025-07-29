@@ -22,6 +22,7 @@ export default function DocumentContent({
   commitId,
   saveId,
   compareId,
+  currentBranchLastCommitId,
 }: {
   documentMode: DocumentMode
   contentMode: DocumentContentMode
@@ -30,14 +31,17 @@ export default function DocumentContent({
   commitId: string | null
   saveId: string | null
   compareId: string | null
+  currentBranchLastCommitId: number | null
 }) {
-  const { originalData, modifiedData, isLoading, error } = useDocumentContent({
-    documentMode,
-    commitId,
-    saveId,
-    compareId,
-    documentId,
-  })
+  const { originalData, modifiedData, commitDiffData, isLoading, error } =
+    useDocumentContent({
+      documentMode,
+      commitId,
+      saveId,
+      compareId,
+      documentId,
+      currentBranchLastCommitId,
+    })
 
   const editorRef = useRef<DocumentEditorRef>(null)
   const queryClient = useQueryClient()
@@ -216,8 +220,11 @@ export default function DocumentContent({
       saveMutation.mutate({ content })
     } else {
       // 원본 데이터와 현재 데이터를 비교하여 변경된 블록만 추출
-      const originalEditorData = convertToEditorData(originalData)
-      const blockDiffs = calculateBlockDiff(originalEditorData, currentData)
+      const prevCommitDiffEditorData = convertToEditorData(commitDiffData)
+      const blockDiffs = calculateBlockDiff(
+        prevCommitDiffEditorData,
+        currentData,
+      )
 
       // 추가되거나 수정된 블록만 필터링
       const changedBlocks: any[] = []

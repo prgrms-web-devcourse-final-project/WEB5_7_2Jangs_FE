@@ -81,6 +81,10 @@ export default function DocumentDetailPage() {
   }
 
   const currentBranchId = getCurrentBranchId()
+  const currentBranch = graphData?.branches.find(
+    (b) => b.id === currentBranchId,
+  )
+  const currentBranchLastCommitId = currentBranch?.leafCommitId ?? null
 
   const handleDocumentListModalClick = (
     documentId: number,
@@ -369,6 +373,7 @@ export default function DocumentDetailPage() {
             commitId={commitId}
             saveId={saveId}
             compareId={compareCommitId}
+            currentBranchLastCommitId={currentBranchLastCommitId}
           />
         </div>
       </ResizableLayout>

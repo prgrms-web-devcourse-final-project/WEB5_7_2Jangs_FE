@@ -9,11 +9,13 @@ interface UseDocumentContentParams {
   saveId: string | null
   compareId: string | null
   documentId: number
+  currentBranchLastCommitId: number | null
 }
 
 interface DocumentContentData {
   originalData: Array<{ [key: string]: any }> | null
   modifiedData: Array<{ [key: string]: any }> | null
+  commitDiffData: Array<{ [key: string]: any }> | null
   isLoading: boolean
   error: string | null
 }
@@ -24,6 +26,7 @@ export function useDocumentContent({
   saveId,
   compareId,
   documentId = 1, // 임시 기본값
+  currentBranchLastCommitId,
 }: UseDocumentContentParams): DocumentContentData {
   const [originalData, setOriginalData] = useState<Array<{
     [key: string]: any
@@ -31,6 +34,13 @@ export function useDocumentContent({
   const [modifiedData, setModifiedData] = useState<Array<{
     [key: string]: any
   }> | null>(null)
+  const [currentBranchLastCommitData, setCurrentBranchLastCommitData] =
+    useState<
+      Array<{
+        [key: string]: any
+      }>
+    >([])
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,11 +55,22 @@ export function useDocumentContent({
             if (!saveId) {
               throw new Error("saveId가 필요합니다")
             }
-            const response: SaveGetResponse = await apiClient.save.getSave({
+
+            const response = await apiClient.save.getSave({
               saveId: Number(saveId),
               documentId,
             })
+
             setOriginalData(response.content || null)
+
+            if (currentBranchLastCommitId) {
+              const lastCommitData = await apiClient.commit.getCommit({
+                docId: documentId,
+                commitId: Number(currentBranchLastCommitId),
+              })
+
+              setCurrentBranchLastCommitData(lastCommitData.content || [])
+            }
             break
           }
 
@@ -102,11 +123,19 @@ export function useDocumentContent({
     }
 
     fetchData()
-  }, [documentMode, commitId, saveId, compareId, documentId])
+  }, [
+    documentMode,
+    commitId,
+    saveId,
+    compareId,
+    documentId,
+    currentBranchLastCommitId,
+  ])
 
   return {
     originalData,
     modifiedData,
+    commitDiffData: currentBranchLastCommitData,
     isLoading,
     error,
   }
