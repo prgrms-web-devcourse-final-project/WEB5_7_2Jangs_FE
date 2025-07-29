@@ -213,7 +213,25 @@ export default function DocumentMergeView({
 
   // 모든 변경사항을 한쪽에서 가져오기
   const applyAllFromSide = (side: "base" | "target") => {
-    setMergedData(side === "base" ? baseData : targetData)
+    console.log("Applying all from side:", side)
+    const sourceData = side === "base" ? baseData : targetData
+    console.log("Source data:", sourceData)
+
+    setMergedData({
+      ...sourceData,
+      time: Date.now(), // 타임스탬프를 업데이트하여 강제 리렌더링
+    })
+
+    // 모든 블록을 하이라이트 효과로 표시
+    const allBlockIds = sourceData.blocks
+      .map((block) => block.id || "")
+      .filter((id) => id)
+    setHighlightedBlocks(new Set(allBlockIds))
+    setTimeout(() => {
+      setHighlightedBlocks(new Set())
+    }, 1500)
+
+    console.log("Merged data updated successfully")
   }
 
   const handleSave = () => {
@@ -362,6 +380,7 @@ export default function DocumentMergeView({
           </div>
           <div className="flex-1 overflow-auto bg-white">
             <DocumentEditor
+              key={`merged-${mergedData.time}`}
               isEditable={true}
               initialData={mergedData}
               onDataChange={setMergedData}
