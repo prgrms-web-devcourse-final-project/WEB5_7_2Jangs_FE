@@ -114,6 +114,7 @@ export default function DocumentDetailPage() {
         break
       case "commit-compare": {
         if (!commitId || !idByType || commitId === idByType.toString()) {
+          console.log("here")
           return
         }
         const comparedCommitId = idByType

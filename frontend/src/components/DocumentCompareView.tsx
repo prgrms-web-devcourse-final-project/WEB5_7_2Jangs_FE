@@ -176,7 +176,7 @@ export default function DocumentCompareView({
   const [showUnchanged, setShowUnchanged] = useState(false)
 
   const blockDiffs = useMemo(() => {
-    return calculateBlockDiff(originalData, modifiedData)
+    return calculateBlockDiff(modifiedData, originalData)
   }, [originalData, modifiedData])
 
   const stats = useMemo(() => {
