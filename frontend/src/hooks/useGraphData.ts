@@ -150,7 +150,7 @@ export function useGraphRender({
       }
 
       // 브랜치의 마지막 커밋인지 확인
-      const isLastCommit = branch?.leafCommitId === commit.id
+      const isLastCommit = branch?.leafCommitId === commit.id && !branch.saveId
 
       // 현재 커밋인지 확인
       const isCurrentCommit = activeCommitId === commit.id.toString()

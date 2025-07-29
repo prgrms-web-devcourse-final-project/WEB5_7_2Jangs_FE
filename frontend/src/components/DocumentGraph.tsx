@@ -53,6 +53,13 @@ export default function DocumentGraph({
     isMainBranchLeafCommit,
   })
 
+  const currentBranch = data.branches.find(
+    (branch) => branch.id === currentBranchId,
+  )
+  const isCurrentCommitLastCommit =
+    currentBranch?.leafCommitId === Number(currentCommitId) &&
+    !currentBranch?.saveId
+
   // 노드에 label (CommitNode 컴포넌트) 추가 - 메모이제이션
   const nodes = useMemo(() => {
     return rawNodes.map((node: any) => ({
@@ -67,7 +74,9 @@ export default function DocumentGraph({
               color={node.data.color}
               isCurrentCommit={node.data.isCurrentCommit}
               isLastCommit={node.data.isLastCommit}
-              showMergeButton={node.data.showMergeButton}
+              showMergeButton={
+                node.data.showMergeButton && isCurrentCommitLastCommit
+              }
               onNodeMenuClick={handleNodeMenuClick}
               openDropdownId={openDropdownId}
               setOpenDropdownId={handleSetOpenDropdownId}
@@ -87,7 +96,13 @@ export default function DocumentGraph({
           ),
       },
     }))
-  }, [rawNodes, openDropdownId, handleNodeMenuClick, handleSetOpenDropdownId])
+  }, [
+    rawNodes,
+    openDropdownId,
+    handleNodeMenuClick,
+    handleSetOpenDropdownId,
+    isCurrentCommitLastCommit,
+  ])
 
   return (
     <div className="relative w-full h-full">
