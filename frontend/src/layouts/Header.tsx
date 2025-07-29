@@ -26,7 +26,10 @@ export default function Header() {
     <header className="w-full bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
+          <Link
+            to={isAuthenticated ? "/documents" : "/"}
+            className="hover:opacity-80 transition-opacity"
+          >
             <div className="w-[200px]">
               <Logo withText />
             </div>
