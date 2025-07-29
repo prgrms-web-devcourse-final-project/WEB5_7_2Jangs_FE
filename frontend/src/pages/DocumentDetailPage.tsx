@@ -331,8 +331,6 @@ export default function DocumentDetailPage() {
     return <Loading text="문서를 불러오는 중..." />
   }
 
-  console.log("graphError", graphError)
-
   return (
     <>
       <ResizableLayout initialWidth={450} minWidth={250} maxWidth={800}>
@@ -355,7 +353,7 @@ export default function DocumentDetailPage() {
             mainBranch={mainBranch}
             currentBranchId={currentBranchId}
             currentCommitId={commitId}
-            currentSaveId={saveId}
+            currentSaveId={mode === "save" ? saveId : null}
             onNodeMenuClick={handleNodeMenuClick}
             onBranchDelete={handleBranchDelete}
           />
