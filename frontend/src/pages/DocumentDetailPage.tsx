@@ -13,9 +13,9 @@ import { alert, confirm, alertDialog } from "@/lib/utils"
 import type { CommitNodeMenuType } from "@/components/CommitNode"
 import type { TempNodeMenuType } from "@/components/TempNode"
 import type { DocumentMode, DocumentContentMode } from "@/types/document"
-import type { RecentActivityDtoRecentTypeEnum } from "@/api/__generated__"
 import { useMutation } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
+import type { RecentActivityDtoRecentTypeEnum } from "@/api/__generated__/models/RecentActivityDto"
 
 export default function DocumentDetailPage() {
   const { id: documentId } = useParams<{
@@ -41,7 +41,10 @@ export default function DocumentDetailPage() {
 
   // 특정 query parameter 값 가져오기
   const modeParam = searchParams.get("mode")
-  const mode = (modeParam as DocumentMode) ?? "commit"
+  const mode =
+    (modeParam as DocumentMode) ??
+    (mainBranch?.saveId ? "save" : mainBranch?.leafCommitId ? "commit" : null)
+
   const commitId =
     mode === "save"
       ? null
@@ -49,7 +52,7 @@ export default function DocumentDetailPage() {
         mainBranch?.leafCommitId?.toString() ??
         null)
   const compareCommitId = searchParams.get("compareCommitId")
-  const saveId = searchParams.get("saveId")
+  const saveId = searchParams.get("saveId") ?? mainBranch?.saveId?.toString()
 
   const navigate = useNavigate()
   const [isDocumentListOpen, setIsDocumentListOpen] = useState(false)
@@ -310,11 +313,6 @@ export default function DocumentDetailPage() {
     navigate(`/documents/${documentId}`)
   }
 
-  // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시
-  if (isGraphLoading || !graphData || !mainBranch || !currentBranchId) {
-    return <Loading text="문서를 불러오는 중..." />
-  }
-
   if (graphError) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -327,6 +325,13 @@ export default function DocumentDetailPage() {
       </div>
     )
   }
+
+  // 그래프 데이터 로딩 중이거나 에러가 있으면 로딩/에러 표시
+  if (isGraphLoading || !graphData || !mainBranch || !currentBranchId) {
+    return <Loading text="문서를 불러오는 중..." />
+  }
+
+  console.log("graphError", graphError)
 
   return (
     <>

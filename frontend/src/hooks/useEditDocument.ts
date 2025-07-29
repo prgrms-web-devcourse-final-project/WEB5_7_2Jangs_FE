@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/apiClient"
 import { alertDialog } from "@/lib/utils"
-import type { DocListResponse } from "@/api/__generated__"
+import type { DocListResponse } from "@/api/__generated__/models/DocListResponse"
 
 interface UseEditDocumentProps {
   documents: DocListResponse[]

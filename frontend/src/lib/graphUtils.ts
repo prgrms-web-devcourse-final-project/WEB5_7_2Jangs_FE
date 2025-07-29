@@ -45,7 +45,7 @@ export function getBranchColor(branchName: string): string {
 export const GRAPH_LAYOUT = {
   BRANCH_SPACING: 250,
   BASE_X_OFFSET: 150,
-  BASE_Y_OFFSET: 100,
+  BASE_Y_OFFSET: 150,
   HEIGHT_RANGE: 450,
   NODE_WIDTH: 180,
 } as const

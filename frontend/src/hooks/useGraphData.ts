@@ -91,6 +91,37 @@ export function useGraphRender({
       { xPosition: number; lastYPosition: number }
     > = {}
 
+    // 각 커밋의 depth 계산 (연결 순서 기반)
+    const commitDepths = new Map<number, number>()
+
+    // 각 브랜치의 루트 커밋들을 찾아서 depth 0으로 설정
+    const rootCommits = data.branches.map((branch) => branch.rootCommitId)
+    for (const commitId of rootCommits) {
+      commitDepths.set(commitId, 0)
+    }
+
+    // edges를 이용해서 각 커밋의 depth 계산
+    const calculateDepths = () => {
+      let changed = true
+      while (changed) {
+        changed = false
+        for (const edge of data.edges) {
+          const sourceDepth = commitDepths.get(edge.from)
+          const targetDepth = commitDepths.get(edge.to)
+
+          if (
+            sourceDepth !== undefined &&
+            (targetDepth === undefined || targetDepth <= sourceDepth)
+          ) {
+            commitDepths.set(edge.to, sourceDepth + 1)
+            changed = true
+          }
+        }
+      }
+    }
+
+    calculateDepths()
+
     // 노드 생성
     const nodes = data.commits.map((commit) => {
       const branch = data.branches.find((b) => b.id === commit.branchId)
@@ -104,15 +135,9 @@ export function useGraphRender({
       const xPosition =
         branchIndex * GRAPH_LAYOUT.BRANCH_SPACING + GRAPH_LAYOUT.BASE_X_OFFSET
 
-      // 시간순으로 y 위치 조정
-      const commitTime = new Date(commit.createdAt).getTime()
-      const allTimes = data.commits.map((c) => new Date(c.createdAt).getTime())
-      const minTime = Math.min(...allTimes)
-      const maxTime = Math.max(...allTimes)
-      const yPosition =
-        ((commitTime - minTime) / (maxTime - minTime || 1)) *
-          GRAPH_LAYOUT.HEIGHT_RANGE +
-        GRAPH_LAYOUT.BASE_Y_OFFSET
+      // 연결 순서(depth)에 따른 y 위치 조정
+      const depth = commitDepths.get(commit.id) || 0
+      const yPosition = depth * 170 + GRAPH_LAYOUT.BASE_Y_OFFSET
 
       // 브랜치별 정보 업데이트
       if (!infoByBranch[commit.branchId]) {
