@@ -84,7 +84,7 @@ export function useGraphRender({
   isMainBranchLeafCommit,
 }: UseGraphRenderProps) {
   // 커밋을 React Flow 노드로 변환
-  const { commitNodes, infoByBranch } = useMemo(() => {
+  const { commitNodes, infoByBranch, commitDepths } = useMemo(() => {
     // 브랜치별 정보 수집용
     const infoByBranch: Record<
       number,
@@ -183,7 +183,7 @@ export function useGraphRender({
       } as GraphNode
     })
 
-    return { commitNodes: nodes, infoByBranch }
+    return { commitNodes: nodes, infoByBranch, commitDepths }
   }, [data, activeCommitId, isMainBranchLeafCommit])
 
   // 엣지를 React Flow 엣지로 변환
@@ -260,17 +260,22 @@ export function useGraphRender({
         if (branchInfo) {
           // 브랜치의 가장 아래 위치에서 80px 아래에 배치
           xPosition = branchInfo.xPosition
-          yPosition =
-            branchInfo.lastYPosition +
-            GRAPH_LAYOUT.BASE_Y_OFFSET * 0.7 +
-            GRAPH_LAYOUT.BASE_Y_OFFSET
+          yPosition = branchInfo.lastYPosition + GRAPH_LAYOUT.BASE_Y_OFFSET + 20
         } else {
-          // 커밋이 없는 브랜치의 경우 기본 위치 설정
           const branchIndex = data.branches.findIndex((b) => b.id === branch.id)
           xPosition =
             branchIndex * GRAPH_LAYOUT.BRANCH_SPACING +
             GRAPH_LAYOUT.BASE_X_OFFSET
-          yPosition = GRAPH_LAYOUT.BASE_Y_OFFSET
+
+          if (branch.fromCommitId) {
+            const depth = commitDepths.get(branch.fromCommitId) + 1
+            if (depth) {
+              yPosition = depth * 170 + GRAPH_LAYOUT.BASE_Y_OFFSET
+            }
+          } else {
+            // 커밋이 없는 브랜치의 경우 기본 위치 설정
+            yPosition = GRAPH_LAYOUT.BASE_Y_OFFSET
+          }
         }
 
         const saveNodeId = `save-${branch.saveId}`
@@ -321,11 +326,55 @@ export function useGraphRender({
             },
           })
         }
+
+        if (branch.fromCommitId) {
+          // 브랜치별 인덱스 계산 (좌우 방향 결정용)
+          const sourceCommitBranchId = data.commits.find(
+            (c) => c.id === branch.fromCommitId,
+          ).branchId
+
+          const sourceBranchIndex = data.branches.findIndex(
+            (b) => b.id === sourceCommitBranchId,
+          )
+          const targetBranchIndex = data.branches.findIndex(
+            (b) => b.id === branch.id,
+          )
+
+          // 다른 브랜치로의 연결인 경우 좌우 핸들 사용
+          let sourceHandle: string | undefined
+          let targetHandle: string | undefined
+
+          if (targetBranchIndex > sourceBranchIndex) {
+            sourceHandle = "right"
+            targetHandle = "top"
+          } else {
+            sourceHandle = "left"
+            targetHandle = "top"
+          }
+
+          tempEdgesArray.push({
+            id: `temp-edge-${branch.id}`,
+            source: `commit-${branch.fromCommitId.toString()}`,
+            target: saveNodeId,
+            sourceHandle,
+            targetHandle,
+            type: "default",
+            animated: true,
+            style: {
+              stroke: "#10b981",
+              strokeWidth: 2,
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: "#10b981",
+            },
+          })
+        }
       }
     }
 
     return { tempNodes: tempNodesArray, tempEdges: tempEdgesArray }
-  }, [data, infoByBranch, activeSaveId])
+  }, [data, infoByBranch, activeSaveId, commitDepths])
 
   return {
     nodes: [...commitNodes, ...tempNodes],
