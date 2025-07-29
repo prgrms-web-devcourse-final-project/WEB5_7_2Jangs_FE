@@ -165,6 +165,11 @@ export default function DocumentDetailPage() {
   const handleBranchEditConfirm = async (branchName: string) => {
     if (!branchEditData) return
 
+    if (branchName === "main") {
+      alertDialog("브랜치의 이름은 main이 될 수 없습니다", "destructive")
+      return
+    }
+
     try {
       const result = await apiClient.branch.createBranchOrSave({
         documentId: Number.parseInt(documentId),
