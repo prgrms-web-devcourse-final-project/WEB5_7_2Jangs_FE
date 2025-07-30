@@ -40,13 +40,13 @@ export interface CreateBranchOrSaveRequest {
 }
 
 export interface DeleteBranchRequest {
-    documentId: number;
     branchId: number;
+    documentId: number;
 }
 
 export interface RenameBranchRequest {
-    documentId: number;
     branchId: number;
+    documentId: number;
     branchRenameRequest: BranchRenameRequest;
 }
 
@@ -56,7 +56,7 @@ export interface RenameBranchRequest {
 export class BranchAPIApi extends runtime.BaseAPI {
 
     /**
-     * 새로운 저장을 만듭니다. 직전에 선택한 직전 커밋의 종류에 따라 다음을 실행합니다:  - 최신커밋에서 이어서 작업할 경우 그 브랜치에 새로운 저장 생성 - 아니라면 새로운 브랜치 생성 후 새로운 저장 생성 
+     * 새로운 저장을 만듭니다. 직전에 선택한 직전 기록의 종류에 따라 다음을 실행합니다:  - 최신기록에서 이어서 작업할 경우 그 버전에 새로운 저장 생성 - 아니라면 새로운 버전 생성 후 새로운 저장 생성 
      * 이어서 작업하기
      */
     async createBranchOrSaveRaw(requestParameters: CreateBranchOrSaveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BranchCreateResponse>> {
@@ -96,7 +96,7 @@ export class BranchAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 새로운 저장을 만듭니다. 직전에 선택한 직전 커밋의 종류에 따라 다음을 실행합니다:  - 최신커밋에서 이어서 작업할 경우 그 브랜치에 새로운 저장 생성 - 아니라면 새로운 브랜치 생성 후 새로운 저장 생성 
+     * 새로운 저장을 만듭니다. 직전에 선택한 직전 기록의 종류에 따라 다음을 실행합니다:  - 최신기록에서 이어서 작업할 경우 그 버전에 새로운 저장 생성 - 아니라면 새로운 버전 생성 후 새로운 저장 생성 
      * 이어서 작업하기
      */
     async createBranchOrSave(requestParameters: CreateBranchOrSaveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BranchCreateResponse> {
@@ -105,21 +105,21 @@ export class BranchAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 브랜치를 삭제합니다. 삭제 조건은 아래와 같습니다:  - 메인 브랜치(`fromCommit == null`)는 삭제 불가 - 다른 브랜치가 이 브랜치를 기반(fromCommit)으로 만들어졌다면 삭제 불가 - 블록, 시퀀스, 저장(MongoDB)도 함께 삭제됨 
-     * 브랜치 삭제
+     * 버전을 삭제합니다. 삭제 조건은 아래와 같습니다:  - 메인 버전(`fromCommit == null`)는 삭제 불가 - 다른 버전이 이 버전을 기반(fromCommit)으로 만들어졌다면 삭제 불가 - 블록, 시퀀스, 저장(MongoDB)도 함께 삭제됨 
+     * 버전 삭제
      */
     async deleteBranchRaw(requestParameters: DeleteBranchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['documentId'] == null) {
-            throw new runtime.RequiredError(
-                'documentId',
-                'Required parameter "documentId" was null or undefined when calling deleteBranch().'
-            );
-        }
-
         if (requestParameters['branchId'] == null) {
             throw new runtime.RequiredError(
                 'branchId',
                 'Required parameter "branchId" was null or undefined when calling deleteBranch().'
+            );
+        }
+
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling deleteBranch().'
             );
         }
 
@@ -129,8 +129,8 @@ export class BranchAPIApi extends runtime.BaseAPI {
 
 
         let urlPath = `/api/document/{documentId}/branch/{branchId}`;
-        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
         urlPath = urlPath.replace(`{${"branchId"}}`, encodeURIComponent(String(requestParameters['branchId'])));
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -143,29 +143,29 @@ export class BranchAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 브랜치를 삭제합니다. 삭제 조건은 아래와 같습니다:  - 메인 브랜치(`fromCommit == null`)는 삭제 불가 - 다른 브랜치가 이 브랜치를 기반(fromCommit)으로 만들어졌다면 삭제 불가 - 블록, 시퀀스, 저장(MongoDB)도 함께 삭제됨 
-     * 브랜치 삭제
+     * 버전을 삭제합니다. 삭제 조건은 아래와 같습니다:  - 메인 버전(`fromCommit == null`)는 삭제 불가 - 다른 버전이 이 버전을 기반(fromCommit)으로 만들어졌다면 삭제 불가 - 블록, 시퀀스, 저장(MongoDB)도 함께 삭제됨 
+     * 버전 삭제
      */
     async deleteBranch(requestParameters: DeleteBranchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteBranchRaw(requestParameters, initOverrides);
     }
 
     /**
-     * 브랜치의 이름을 수정합니다. 메인브랜치의 이름은 수정할 수 없습니다.
-     * 브랜치 이름 변경
+     * 버전의 이름을 수정합니다. 메인버전의 이름은 수정할 수 없습니다.
+     * 버전 이름 변경
      */
     async renameBranchRaw(requestParameters: RenameBranchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BranchRenameResponse>> {
-        if (requestParameters['documentId'] == null) {
-            throw new runtime.RequiredError(
-                'documentId',
-                'Required parameter "documentId" was null or undefined when calling renameBranch().'
-            );
-        }
-
         if (requestParameters['branchId'] == null) {
             throw new runtime.RequiredError(
                 'branchId',
                 'Required parameter "branchId" was null or undefined when calling renameBranch().'
+            );
+        }
+
+        if (requestParameters['documentId'] == null) {
+            throw new runtime.RequiredError(
+                'documentId',
+                'Required parameter "documentId" was null or undefined when calling renameBranch().'
             );
         }
 
@@ -184,8 +184,8 @@ export class BranchAPIApi extends runtime.BaseAPI {
 
 
         let urlPath = `/api/document/{documentId}/branch/{branchId}`;
-        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
         urlPath = urlPath.replace(`{${"branchId"}}`, encodeURIComponent(String(requestParameters['branchId'])));
+        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -199,8 +199,8 @@ export class BranchAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 브랜치의 이름을 수정합니다. 메인브랜치의 이름은 수정할 수 없습니다.
-     * 브랜치 이름 변경
+     * 버전의 이름을 수정합니다. 메인버전의 이름은 수정할 수 없습니다.
+     * 버전 이름 변경
      */
     async renameBranch(requestParameters: RenameBranchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BranchRenameResponse> {
         const response = await this.renameBranchRaw(requestParameters, initOverrides);

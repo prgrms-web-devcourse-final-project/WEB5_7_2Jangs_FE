@@ -47,8 +47,8 @@ export default function MergePage() {
         mergeCommitRequest: {
           title: `Merge commit from ${baseCommitId} to ${targetCommitId}`,
           description: "Merged using document merge tool",
-          baseBranchId: Number(baseCommitId),
-          targetBranchId: Number(targetCommitId),
+          baseCommitId: Number(baseCommitId),
+          targetCommitId: Number(targetCommitId),
           content,
         },
       })

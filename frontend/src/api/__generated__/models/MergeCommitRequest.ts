@@ -44,13 +44,13 @@ export interface MergeCommitRequest {
      * @type {number}
      * @memberof MergeCommitRequest
      */
-    baseBranchId?: number;
+    baseCommitId?: number;
     /**
      * 
      * @type {number}
      * @memberof MergeCommitRequest
      */
-    targetBranchId?: number;
+    targetCommitId?: number;
     /**
      * 
      * @type {Array<BlockDto>}
@@ -79,8 +79,8 @@ export function MergeCommitRequestFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'title': json['title'],
         'description': json['description'] == null ? undefined : json['description'],
-        'baseBranchId': json['baseBranchId'] == null ? undefined : json['baseBranchId'],
-        'targetBranchId': json['targetBranchId'] == null ? undefined : json['targetBranchId'],
+        'baseCommitId': json['baseCommitId'] == null ? undefined : json['baseCommitId'],
+        'targetCommitId': json['targetCommitId'] == null ? undefined : json['targetCommitId'],
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(BlockDtoFromJSON)),
     };
 }
@@ -98,8 +98,8 @@ export function MergeCommitRequestToJSONTyped(value?: MergeCommitRequest | null,
         
         'title': value['title'],
         'description': value['description'],
-        'baseBranchId': value['baseBranchId'],
-        'targetBranchId': value['targetBranchId'],
+        'baseCommitId': value['baseCommitId'],
+        'targetCommitId': value['targetCommitId'],
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(BlockDtoToJSON)),
     };
 }

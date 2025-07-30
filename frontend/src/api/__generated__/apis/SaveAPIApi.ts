@@ -32,17 +32,17 @@ import {
 } from '../models/index';
 
 export interface DeleteSaveRequest {
-    documentId: number;
+    docId: number;
     saveId: number;
 }
 
 export interface GetSaveRequest {
-    documentId: number;
+    docId: number;
     saveId: number;
 }
 
 export interface UpdateSaveRequest {
-    documentId: number;
+    docId: number;
     saveId: number;
     saveUpdateRequest: SaveUpdateRequest;
 }
@@ -57,10 +57,10 @@ export class SaveAPIApi extends runtime.BaseAPI {
      * 유저가 요청한 저장 id에 해당하는 저장 삭제
      */
     async deleteSaveRaw(requestParameters: DeleteSaveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['documentId'] == null) {
+        if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
-                'documentId',
-                'Required parameter "documentId" was null or undefined when calling deleteSave().'
+                'docId',
+                'Required parameter "docId" was null or undefined when calling deleteSave().'
             );
         }
 
@@ -76,8 +76,8 @@ export class SaveAPIApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/document/{documentId}/save/{saveId}`;
-        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+        let urlPath = `/api/document/{docId}/save/{saveId}`;
+        urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
         urlPath = urlPath.replace(`{${"saveId"}}`, encodeURIComponent(String(requestParameters['saveId'])));
 
         const response = await this.request({
@@ -103,10 +103,10 @@ export class SaveAPIApi extends runtime.BaseAPI {
      * 유저가 요청한 저장 id에 해당하는 저장 조회
      */
     async getSaveRaw(requestParameters: GetSaveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SaveGetResponse>> {
-        if (requestParameters['documentId'] == null) {
+        if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
-                'documentId',
-                'Required parameter "documentId" was null or undefined when calling getSave().'
+                'docId',
+                'Required parameter "docId" was null or undefined when calling getSave().'
             );
         }
 
@@ -122,8 +122,8 @@ export class SaveAPIApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/document/{documentId}/save/{saveId}`;
-        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+        let urlPath = `/api/document/{docId}/save/{saveId}`;
+        urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
         urlPath = urlPath.replace(`{${"saveId"}}`, encodeURIComponent(String(requestParameters['saveId'])));
 
         const response = await this.request({
@@ -150,10 +150,10 @@ export class SaveAPIApi extends runtime.BaseAPI {
      * 유저가 요청한 저장 id에 해당하는 저장 수정
      */
     async updateSaveRaw(requestParameters: UpdateSaveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SaveUpdateResponse>> {
-        if (requestParameters['documentId'] == null) {
+        if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
-                'documentId',
-                'Required parameter "documentId" was null or undefined when calling updateSave().'
+                'docId',
+                'Required parameter "docId" was null or undefined when calling updateSave().'
             );
         }
 
@@ -178,8 +178,8 @@ export class SaveAPIApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/document/{documentId}/save/{saveId}`;
-        urlPath = urlPath.replace(`{${"documentId"}}`, encodeURIComponent(String(requestParameters['documentId'])));
+        let urlPath = `/api/document/{docId}/save/{saveId}`;
+        urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
         urlPath = urlPath.replace(`{${"saveId"}}`, encodeURIComponent(String(requestParameters['saveId'])));
 
         const response = await this.request({

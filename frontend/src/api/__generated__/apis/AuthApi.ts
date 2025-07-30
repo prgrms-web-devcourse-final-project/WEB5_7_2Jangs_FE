@@ -127,7 +127,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 
+     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 재전송 제한 시간(3분) 내에 다시 요청하면 재전송 실패 에러가 발생합니다. 
      * 비밀번호 변경 인증코드 전송
      */
     async sendResetPwdCodeRaw(requestParameters: SendResetPwdCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -159,7 +159,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 
+     * 사용자가 입력한 이메일 주소로 비밀번호 재설정을 위한 인증코드를 전송합니다. 해당 이메일이 등록된 사용자 계정이어야 하며, 인증코드는 일정 시간 동안 유효합니다. 존재하지 않는 사용자에게 요청 시 에러가 발생합니다. 재전송 제한 시간(3분) 내에 다시 요청하면 재전송 실패 에러가 발생합니다. 
      * 비밀번호 변경 인증코드 전송
      */
     async sendResetPwdCode(requestParameters: SendResetPwdCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -167,7 +167,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 
+     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 재전송 제한 시간(3분) 내에 다시 요청하면 재전송 실패 에러가 발생합니다. 
      * 회원가입 인증코드 전송
      */
     async sendSignupCodeRaw(requestParameters: SendSignupCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -199,7 +199,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 
+     * 사용자가 입력한 이메일 주소로 회원가입을 위한 인증코드를 전송합니다. 인증코드는 이메일로 전송되며, 제한된 시간(3분) 내에 입력되어야 합니다. 이미 가입된 이메일 주소로 요청하는 경우 에러가 발생합니다. 재전송 제한 시간(3분) 내에 다시 요청하면 재전송 실패 에러가 발생합니다. 
      * 회원가입 인증코드 전송
      */
     async sendSignupCode(requestParameters: SendSignupCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {

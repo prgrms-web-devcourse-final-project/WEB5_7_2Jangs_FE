@@ -54,8 +54,8 @@ export interface DeleteCommitRequest {
 }
 
 export interface GetCommitRequest {
-    commitId: number;
     docId: number;
+    commitId: number;
 }
 
 export interface MergeCommitOperationRequest {
@@ -69,8 +69,8 @@ export interface MergeCommitOperationRequest {
 export class CommitAPIApi extends runtime.BaseAPI {
 
     /**
-     * 유저가 소유한 문서에서 머지할 2개의 커밋 내용을 조회합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
-     * 머지할 2개의 커밋 내용을 조회합니다.
+     * 유저가 소유한 문서에서 병합할 2개의 기록을 조회합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
+     * 병합할 2개의 기록을 조회합니다.
      */
     async compareMergeCommitRaw(requestParameters: CompareMergeCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CompareMergeCommitResponse>> {
         if (requestParameters['docId'] == null) {
@@ -121,8 +121,8 @@ export class CommitAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 유저가 소유한 문서에서 머지할 2개의 커밋 내용을 조회합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
-     * 머지할 2개의 커밋 내용을 조회합니다.
+     * 유저가 소유한 문서에서 병합할 2개의 기록을 조회합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
+     * 병합할 2개의 기록을 조회합니다.
      */
     async compareMergeCommit(requestParameters: CompareMergeCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CompareMergeCommitResponse> {
         const response = await this.compareMergeCommitRaw(requestParameters, initOverrides);
@@ -179,7 +179,7 @@ export class CommitAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 기록을 삭제합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다.  삭제 조건은 아래와 같습니다:  - 각 브랜치의 LeafCommit만 삭제 가능 - 어느 브랜치의 FromCommit이면 삭제 불가 - 브랜치의 RootCommit은 삭제 불가(RootCommit까지 삭제하고 싶은 경우 브랜치 삭제를 권장합니다) 
+     * 기록을 삭제합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다.  삭제 조건은 아래와 같습니다:  - 각 버전의 LeafCommit만 삭제 가능 - 어느 버전의 FromCommit이면 삭제 불가 - 버전의 RootCommit은 삭제 불가(RootCommit까지 삭제하고 싶은 경우 버전 삭제를 권장합니다) 
      * 기록 삭제
      */
     async deleteCommitRaw(requestParameters: DeleteCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -217,7 +217,7 @@ export class CommitAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 기록을 삭제합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다.  삭제 조건은 아래와 같습니다:  - 각 브랜치의 LeafCommit만 삭제 가능 - 어느 브랜치의 FromCommit이면 삭제 불가 - 브랜치의 RootCommit은 삭제 불가(RootCommit까지 삭제하고 싶은 경우 브랜치 삭제를 권장합니다) 
+     * 기록을 삭제합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다.  삭제 조건은 아래와 같습니다:  - 각 버전의 LeafCommit만 삭제 가능 - 어느 버전의 FromCommit이면 삭제 불가 - 버전의 RootCommit은 삭제 불가(RootCommit까지 삭제하고 싶은 경우 버전 삭제를 권장합니다) 
      * 기록 삭제
      */
     async deleteCommit(requestParameters: DeleteCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -229,17 +229,17 @@ export class CommitAPIApi extends runtime.BaseAPI {
      * 유저가 기존에 만든 기록(commit)을 조회합니다
      */
     async getCommitRaw(requestParameters: GetCommitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CommitResponse>> {
-        if (requestParameters['commitId'] == null) {
-            throw new runtime.RequiredError(
-                'commitId',
-                'Required parameter "commitId" was null or undefined when calling getCommit().'
-            );
-        }
-
         if (requestParameters['docId'] == null) {
             throw new runtime.RequiredError(
                 'docId',
                 'Required parameter "docId" was null or undefined when calling getCommit().'
+            );
+        }
+
+        if (requestParameters['commitId'] == null) {
+            throw new runtime.RequiredError(
+                'commitId',
+                'Required parameter "commitId" was null or undefined when calling getCommit().'
             );
         }
 
@@ -249,8 +249,8 @@ export class CommitAPIApi extends runtime.BaseAPI {
 
 
         let urlPath = `/api/document/{docId}/commit/{commitId}`;
-        urlPath = urlPath.replace(`{${"commitId"}}`, encodeURIComponent(String(requestParameters['commitId'])));
         urlPath = urlPath.replace(`{${"docId"}}`, encodeURIComponent(String(requestParameters['docId'])));
+        urlPath = urlPath.replace(`{${"commitId"}}`, encodeURIComponent(String(requestParameters['commitId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -272,8 +272,8 @@ export class CommitAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 유저가 소유한 문서에서 branch 2개를 merge 합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
-     * request 에 담긴 2개의 branch id 를 기반으로 merge 합니다.
+     * 유저가 소유한 문서에서 기록 2개를 병합 합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
+     * request 에 담긴 2개의 commit id 를 기반으로 병합 합니다.
      */
     async mergeCommitRaw(requestParameters: MergeCommitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateCommitResponse>> {
         if (requestParameters['docId'] == null) {
@@ -312,8 +312,8 @@ export class CommitAPIApi extends runtime.BaseAPI {
     }
 
     /**
-     * 유저가 소유한 문서에서 branch 2개를 merge 합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
-     * request 에 담긴 2개의 branch id 를 기반으로 merge 합니다.
+     * 유저가 소유한 문서에서 기록 2개를 병합 합니다. 🔐 이 API는 세션 로그인 상태에서 호출되어야 하며, 클라이언트는 쿠키(`JSESSIONID`)를 통해 인증 정보를 전송해야 합니다. 
+     * request 에 담긴 2개의 commit id 를 기반으로 병합 합니다.
      */
     async mergeCommit(requestParameters: MergeCommitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateCommitResponse> {
         const response = await this.mergeCommitRaw(requestParameters, initOverrides);
