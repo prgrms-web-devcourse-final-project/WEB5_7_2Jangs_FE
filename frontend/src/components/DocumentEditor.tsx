@@ -72,7 +72,8 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
         placeholder: isEditable ? "내용을 입력하세요..." : "",
         tools: {
           header: {
-            class: Header as any,
+            class: Header,
+            inlineToolbar: false,
             config: {
               placeholder: "제목을 입력하세요",
               levels: [1, 2, 3, 4, 5, 6],
@@ -80,14 +81,14 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
             },
           },
           list: {
-            class: List as any,
+            class: List,
             inlineToolbar: true,
             config: {
               defaultStyle: "unordered",
             },
           },
           quote: {
-            class: Quote as any,
+            class: Quote,
             inlineToolbar: true,
             config: {
               quotePlaceholder: "인용문을 입력하세요",
@@ -95,14 +96,14 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
             },
           },
           code: {
-            class: Code as any,
+            class: Code,
             config: {
               placeholder: "코드를 입력하세요",
             },
           },
-          delimiter: Delimiter as any,
+          delimiter: Delimiter,
           paragraph: {
-            class: Paragraph as any,
+            class: Paragraph,
             inlineToolbar: true,
           },
         },
@@ -120,6 +121,61 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
 
       editor.isReady
         .then(() => {
+          // Header 스타일 강제 적용 (CSS 우선순위 문제 해결)
+          const applyHeaderStyles = () => {
+            const headers = containerRef.current?.querySelectorAll(
+              "h1, h2, h3, h4, h5, h6",
+            )
+
+            if (headers) {
+              for (const header of headers) {
+                const headerElement = header as HTMLElement
+
+                // EditorJS 헤더인지 확인
+                const isEditorJSHeader =
+                  headerElement.closest('.ce-block[data-tool="header"]') ||
+                  headerElement.closest(".ce-header") ||
+                  headerElement.parentElement?.classList.contains("ce-header")
+
+                if (isEditorJSHeader) {
+                  const tagName = header.tagName.toLowerCase()
+
+                  // 헤더 레벨에 따른 스타일 적용
+                  const styles = {
+                    h1: { fontSize: "2em", fontWeight: "bold" },
+                    h2: { fontSize: "1.5em", fontWeight: "bold" },
+                    h3: { fontSize: "1.25em", fontWeight: "bold" },
+                    h4: { fontSize: "1.1em", fontWeight: "bold" },
+                    h5: { fontSize: "1em", fontWeight: "bold" },
+                    h6: { fontSize: "0.875em", fontWeight: "bold" },
+                  }
+
+                  const style = styles[tagName as keyof typeof styles]
+                  if (style) {
+                    headerElement.style.fontSize = style.fontSize
+                    headerElement.style.fontWeight = style.fontWeight
+                    headerElement.style.margin = "0"
+                    headerElement.style.padding = "0.5em 0"
+                  }
+                }
+              }
+            }
+          }
+
+          // 초기 적용
+          setTimeout(applyHeaderStyles, 100)
+
+          // DOM 변화 감지하여 새로 생성된 헤더에도 스타일 적용
+          if (containerRef.current) {
+            const observer = new MutationObserver(() => {
+              applyHeaderStyles()
+            })
+            observer.observe(containerRef.current, {
+              childList: true,
+              subtree: true,
+            })
+          }
+
           setIsReady(true)
           editorRef.current = editor
         })
@@ -129,7 +185,6 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
 
       return () => {
         if (editorRef.current) {
-          console.log(editorRef.current)
           editorRef.current.destroy()
           editorRef.current = null
         }
@@ -142,17 +197,6 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
         editorRef.current.readOnly.toggle(!isEditable)
       }
     }, [isEditable, isReady])
-
-    // Handle data changes - 이제 에디터 재생성으로 처리됨
-    // useEffect(() => {
-    //   console.log("DocumentEditor: initialData changed", initialData)
-    //   if (editorRef.current && isReady && initialData) {
-    //     // Editor를 완전히 재생성하는 대신 render 메서드 사용
-    //     editorRef.current.render(initialData).catch((error) => {
-    //       console.error("Error rendering new data:", error)
-    //     })
-    //   }
-    // }, [initialData, isReady])
 
     // Expose saveData function to parent component
     useEffect(() => {
