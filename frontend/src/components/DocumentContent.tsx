@@ -90,7 +90,7 @@ export default function DocumentContent({
       if (!saveId) throw new Error("저장 ID가 없습니다")
 
       return await apiClient.save.updateSave({
-        documentId,
+        docId: documentId,
         saveId: Number(saveId),
         saveUpdateRequest: {
           content,

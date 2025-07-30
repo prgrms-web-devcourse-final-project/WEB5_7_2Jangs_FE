@@ -22,7 +22,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import type { DocListResponse } from "@/api/__generated__"
+import type { DocListResponse } from "@/api/__generated__/models/DocListResponse"
 
 export default function DocumentsList() {
   const navigate = useNavigate()

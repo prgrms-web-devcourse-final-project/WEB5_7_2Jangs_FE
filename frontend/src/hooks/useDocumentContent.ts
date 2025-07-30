@@ -58,7 +58,7 @@ export function useDocumentContent({
 
             const response = await apiClient.save.getSave({
               saveId: Number(saveId),
-              documentId,
+              docId: documentId,
             })
 
             setOriginalData(response.content || null)

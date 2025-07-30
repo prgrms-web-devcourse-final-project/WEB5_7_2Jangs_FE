@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FileText, MoreVertical, Edit, Trash2 } from "lucide-react"
 import { formatDate, formatDateForDocuments } from "@/lib/date"
-import type { DocListResponse } from "@/api/__generated__"
+import type { DocListResponse } from "@/api/__generated__/models/DocListResponse"
 
 interface DocumentCardProps {
   document: DocListResponse
