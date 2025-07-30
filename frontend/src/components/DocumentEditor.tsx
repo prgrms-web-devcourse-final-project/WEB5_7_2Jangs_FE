@@ -18,17 +18,34 @@ interface DocumentEditorProps {
   isEditable: boolean
   initialData?: OutputData
   onDataChange?: (data: OutputData) => void
+  onFocus?: () => void
+  onBlur?: () => void
+  shouldUpdateOnChange?: boolean // 포커스 상태에 따라 onChange 실행 제어
+  disableAutoUpdate?: boolean // initialData 변경 시 자동 업데이트 비활성화
 }
 
 export interface DocumentEditorRef {
   saveData: () => Promise<OutputData | null>
+  updateData: (data: OutputData) => Promise<void>
 }
 
 const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
-  ({ isEditable, initialData, onDataChange }, ref) => {
+  (
+    {
+      isEditable,
+      initialData,
+      onDataChange,
+      onFocus,
+      onBlur,
+      shouldUpdateOnChange = true,
+      disableAutoUpdate = false,
+    },
+    ref,
+  ) => {
     const editorRef = useRef<EditorJS | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const [isReady, setIsReady] = useState(false)
+    const shouldUpdateOnChangeRef = useRef(shouldUpdateOnChange)
 
     const saveData = useCallback(async (): Promise<OutputData | null> => {
       if (editorRef.current) {
@@ -43,13 +60,29 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
       return null
     }, [])
 
+    const updateData = useCallback(async (data: OutputData): Promise<void> => {
+      if (editorRef.current) {
+        try {
+          await editorRef.current.render(data)
+        } catch (error) {
+          console.error("Error updating editor data:", error)
+        }
+      }
+    }, [])
+
     useImperativeHandle(
       ref,
       () => ({
         saveData,
+        updateData,
       }),
-      [saveData],
+      [saveData, updateData],
     )
+
+    // shouldUpdateOnChange 값을 ref에 동기화
+    useEffect(() => {
+      shouldUpdateOnChangeRef.current = shouldUpdateOnChange
+    }, [shouldUpdateOnChange])
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
@@ -108,7 +141,7 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
           },
         },
         onChange: async () => {
-          if (onDataChange && isEditable) {
+          if (onDataChange && isEditable && shouldUpdateOnChangeRef.current) {
             try {
               const outputData = await editor.save()
               onDataChange(outputData)
@@ -189,7 +222,16 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
           editorRef.current = null
         }
       }
-    }, [initialData?.time, isEditable]) // initialData 또는 편집 모드 변경에 반응
+    }, [isEditable]) // 편집 모드 변경에만 반응
+
+    // initialData 변경 시 에디터 내용 업데이트 (재생성 없이)
+    useEffect(() => {
+      if (editorRef.current && isReady && initialData && !disableAutoUpdate) {
+        editorRef.current.render(initialData).catch((error) => {
+          console.error("Error updating editor data:", error)
+        })
+      }
+    }, [initialData, isReady, disableAutoUpdate])
 
     // Handle mode changes
     useEffect(() => {
@@ -223,6 +265,8 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(
             fontSize: "16px",
             lineHeight: "1.6",
           }}
+          onFocusCapture={onFocus}
+          onBlurCapture={onBlur}
         />
         {!isReady && (
           <div className="flex items-center justify-center min-h-[400px]">

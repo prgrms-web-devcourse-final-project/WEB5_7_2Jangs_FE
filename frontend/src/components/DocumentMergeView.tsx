@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import type { OutputData } from "@editorjs/editorjs"
-import DocumentEditor from "./DocumentEditor"
+import DocumentEditor, { type DocumentEditorRef } from "./DocumentEditor"
 import { Button } from "./ui/button"
 import {
   ChevronRight,
@@ -111,6 +111,7 @@ export default function DocumentMergeView({
     new Set(),
   )
   const [showBlockDetails, setShowBlockDetails] = useState(true)
+  const mergedEditorRef = useRef<DocumentEditorRef>(null)
 
   // base와 target 간의 차이점 계산
   const conflicts = useMemo(() => {
@@ -157,11 +158,18 @@ export default function DocumentMergeView({
 
     console.log("New blocks:", newBlocks)
 
-    setMergedData({
+    const newMergedData = {
       ...mergedData,
       blocks: newBlocks,
-      time: Date.now(),
-    })
+    }
+
+    // 외부에서 블록을 적용하는 경우 에디터 데이터를 직접 업데이트
+    setMergedData(newMergedData)
+    if (mergedEditorRef.current) {
+      mergedEditorRef.current.updateData(newMergedData).catch((error) => {
+        console.error("Error updating merged editor:", error)
+      })
+    }
 
     // 하이라이트 효과
     setHighlightedBlocks(new Set([blockId]))
@@ -204,11 +212,18 @@ export default function DocumentMergeView({
       }
     }
 
-    setMergedData({
+    const newMergedData = {
       ...mergedData,
       blocks: newBlocks,
-      time: Date.now(),
-    })
+    }
+
+    // 외부에서 충돌을 적용하는 경우 에디터 데이터를 직접 업데이트
+    setMergedData(newMergedData)
+    if (mergedEditorRef.current) {
+      mergedEditorRef.current.updateData(newMergedData).catch((error) => {
+        console.error("Error updating merged editor:", error)
+      })
+    }
   }
 
   // 모든 변경사항을 한쪽에서 가져오기
@@ -217,10 +232,17 @@ export default function DocumentMergeView({
     const sourceData = side === "base" ? baseData : targetData
     console.log("Source data:", sourceData)
 
-    setMergedData({
+    const newMergedData = {
       ...sourceData,
-      time: Date.now(), // 타임스탬프를 업데이트하여 강제 리렌더링
-    })
+    }
+
+    // 외부에서 모든 블록을 적용하는 경우 에디터 데이터를 직접 업데이트
+    setMergedData(newMergedData)
+    if (mergedEditorRef.current) {
+      mergedEditorRef.current.updateData(newMergedData).catch((error) => {
+        console.error("Error updating merged editor:", error)
+      })
+    }
 
     // 모든 블록을 하이라이트 효과로 표시
     const allBlockIds = sourceData.blocks
@@ -234,8 +256,27 @@ export default function DocumentMergeView({
     console.log("Merged data updated successfully")
   }
 
-  const handleSave = () => {
-    onSave(mergedData)
+  // 에디터 데이터 변경 핸들러
+  const handleMergedDataChange = (data: OutputData) => {
+    setMergedData(data)
+  }
+
+  const handleSave = async () => {
+    // 저장 시에는 현재 에디터 상태를 직접 가져와서 사용
+    let dataToSave = mergedData
+
+    if (mergedEditorRef.current) {
+      try {
+        const currentData = await mergedEditorRef.current.saveData()
+        if (currentData) {
+          dataToSave = currentData
+        }
+      } catch (error) {
+        console.error("Error saving editor data:", error)
+      }
+    }
+
+    onSave(dataToSave)
   }
 
   const navigateConflict = (direction: "prev" | "next") => {
@@ -380,10 +421,12 @@ export default function DocumentMergeView({
           </div>
           <div className="flex-1 overflow-auto bg-white">
             <DocumentEditor
-              key={`merged-${mergedData.time}`}
+              ref={mergedEditorRef}
               isEditable={true}
               initialData={mergedData}
-              onDataChange={setMergedData}
+              onDataChange={handleMergedDataChange}
+              shouldUpdateOnChange={true}
+              disableAutoUpdate={true}
             />
           </div>
         </div>

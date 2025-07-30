@@ -25,16 +25,30 @@ export function blockToText(block: EditorBlock): string {
       return (block.data.text as string) || ""
     case "header":
       return `${"#".repeat((block.data.level as number) || 1)} ${(block.data.text as string) || ""}`
-    case "list":
+    case "list": {
+      const items = block.data.items as any[]
       return (
-        (block.data.items as string[])
-          ?.map((item: string, index: number) =>
-            block.data.style === "ordered"
-              ? `${index + 1}. ${item}`
-              : `• ${item}`,
-          )
+        items
+          ?.map((item: any, index: number) => {
+            // item이 객체인 경우 content 속성을 찾거나 문자열로 변환
+            let itemText = ""
+            if (typeof item === "string") {
+              itemText = item
+            } else if (item && typeof item === "object") {
+              // content, text, value 등의 속성에서 텍스트 찾기
+              itemText =
+                item.content || item.text || item.value || JSON.stringify(item)
+            } else {
+              itemText = String(item)
+            }
+
+            return block.data.style === "ordered"
+              ? `${index + 1}. ${itemText}`
+              : `• ${itemText}`
+          })
           .join("\n") || ""
       )
+    }
     case "quote":
       return `> ${(block.data.text as string) || ""}`
     case "code":
