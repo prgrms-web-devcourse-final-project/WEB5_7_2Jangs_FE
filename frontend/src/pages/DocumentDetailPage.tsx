@@ -185,9 +185,28 @@ export default function DocumentDetailPage() {
       navigate(`/documents/${documentId}?mode=save&saveId=${result.saveId}`)
 
       window.location.reload()
-    } catch (error) {
+    } catch (error: any) {
       console.error("버전 생성 중 오류:", error)
-      alertDialog("버전 생성 중 오류가 발생했습니다.", "오류", "destructive")
+
+      // 서버에서 내려온 에러 메시지 추출
+      let errorMessage = "버전 생성 중 오류가 발생했습니다."
+
+      try {
+        // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
+        if (error?.response && error.response.status === 400) {
+          const errorData = await error.response.json()
+          console.log("errorData", errorData)
+          if (errorData?.message) {
+            errorMessage = errorData.message
+          }
+        }
+      } catch (parseError) {
+        console.error("에러 메시지 파싱 실패:", parseError)
+      }
+
+      console.log("errorMessage", errorMessage)
+
+      alertDialog(errorMessage, "오류", "destructive")
     }
   }
 
