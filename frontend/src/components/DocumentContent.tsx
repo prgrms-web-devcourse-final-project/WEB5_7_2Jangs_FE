@@ -130,7 +130,7 @@ export default function DocumentContent({
     },
   })
 
-  // 커밋 API 호출
+  // 기록 API 호출
   const commitMutation = useMutation({
     mutationFn: async ({
       title,
@@ -160,10 +160,10 @@ export default function DocumentContent({
       setModalState({ isOpen: false, mode: "commit" })
     },
     onError: async (error: any) => {
-      console.error("커밋 실패:", error)
+      console.error("기록 실패:", error)
 
       // 서버에서 내려온 에러 메시지 추출
-      let errorMessage = "커밋에 실패했습니다."
+      let errorMessage = "기록에 실패했습니다."
 
       try {
         // OpenAPI Generator의 ResponseError 구조에 맞게 파싱

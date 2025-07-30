@@ -180,7 +180,7 @@ const CommitNode = React.memo(function CommitNode({
               className="cursor-pointer text-green-600 focus:text-green-600"
             >
               <GitMerge className="h-4 w-4 mr-2" />
-              여기로 머지하기
+              여기로 병합하기
             </DropdownMenuItem>
           )}
           {isLastCommit && (

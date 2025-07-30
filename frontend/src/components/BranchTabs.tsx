@@ -112,7 +112,7 @@ export default function BranchTabs({
       <div className="flex items-center gap-2 p-3 bg-gray-50 border-b border-gray-200 overflow-scroll">
         <GitBranch className="h-4 w-4 text-gray-600" />
         <span className="flex-shrink-0 text-sm font-medium text-gray-700">
-          브랜치:
+          버전:
         </span>
 
         <div className="flex items-center gap-1 flex-1">
@@ -146,7 +146,7 @@ export default function BranchTabs({
                   <button
                     className="ml-1 opacity-0 group-hover:opacity-100 hover:bg-red-100 rounded-full p-0.5 transition-all"
                     onClick={(e) => handleDeleteClick(e, branch)}
-                    title={`${branch.name} 브랜치 삭제`}
+                    title={`${branch.name} 버전 삭제`}
                   >
                     <X className="h-3 w-3 text-red-600" />
                   </button>
@@ -175,27 +175,27 @@ export default function BranchTabs({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <GitBranch className="h-5 w-5 text-red-600" />
-              브랜치 삭제 확인
+              버전 삭제 확인
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <div>
-                <strong>'{deleteDialog.branch?.name}'</strong> 브랜치를
+                <strong>'{deleteDialog.branch?.name}'</strong> 버전을
                 삭제하시겠습니까?
               </div>
 
               <div className="text-sm bg-gray-50 p-3 rounded-lg">
                 <div className="flex justify-between items-center mb-1">
-                  <span>커밋 개수:</span>
+                  <span>기록 개수:</span>
                   <span className="font-medium">
                     {deleteDialog.commitCount}개
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>머지 상태:</span>
+                  <span>병합 상태:</span>
                   <span
                     className={`font-medium ${deleteDialog.isMerged ? "text-green-600" : "text-orange-600"}`}
                   >
-                    {deleteDialog.isMerged ? "머지됨" : "머지되지 않음"}
+                    {deleteDialog.isMerged ? "병합됨" : "병합되지 않음"}
                   </span>
                 </div>
               </div>
@@ -207,8 +207,8 @@ export default function BranchTabs({
                     <div>
                       <div className="font-medium">주의!</div>
                       <div className="text-sm">
-                        이 브랜치는 아직 머지되지 않았습니다. 삭제하면 작업
-                        내용이 영구적으로 손실될 수 있습니다.
+                        이 버전은 아직 병합되지 않았습니다. 삭제하면 작업 내용이
+                        영구적으로 손실될 수 있습니다.
                       </div>
                     </div>
                   </div>

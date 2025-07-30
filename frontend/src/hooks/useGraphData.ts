@@ -306,8 +306,8 @@ export function useGraphRender({
             color,
             isCurrentTemp,
             isTemp: true,
-            title: "임시 저장",
-            description: "임시로 저장된 변경사항",
+            title: "저장",
+            description: "저장된 변경사항",
           },
           style: {
             backgroundColor: "#f9fafb",

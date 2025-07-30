@@ -89,10 +89,10 @@ const TempNode = React.memo(function TempNode({
               {description}
             </div>
             <div className="font-semibold text-sm truncate text-gray-700">
-              임시 저장
+              저장
             </div>
             <div className="text-xs text-gray-500 mt-2 italic invisible">
-              임시 저장됨
+              저장됨
             </div>
             <div
               className="text-xs mt-2 px-2 py-1 rounded-full inline-block text-white opacity-80"

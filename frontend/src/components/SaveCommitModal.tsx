@@ -52,23 +52,23 @@ export default function SaveCommitModal({
           {mode === "commit" && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="title">커밋 제목 *</Label>
+                <Label htmlFor="title">기록 제목 *</Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder={"커밋 제목을 입력하세요"}
+                  placeholder={"기록 제목을 입력하세요"}
                   required
                   disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">커밋 설명</Label>
+                <Label htmlFor="description">기록 설명</Label>
                 <Input
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder={"커밋에 대한 설명을 입력하세요"}
+                  placeholder={"기록에 대한 설명을 입력하세요"}
                   disabled={isLoading}
                 />
               </div>

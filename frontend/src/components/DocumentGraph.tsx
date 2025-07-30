@@ -107,7 +107,7 @@ export default function DocumentGraph({
   return (
     <div className="relative w-full h-full">
       <div className="w-full h-full border border-gray-200 rounded-lg overflow-hidden">
-        {/* 브랜치 탭 */}
+        {/* 버전 탭 */}
         <BranchTabs
           branches={data.branches}
           commits={data.commits}

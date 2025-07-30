@@ -48,25 +48,25 @@ export default function BranchEditModal({
         <DialogHeader>
           <DialogTitle>
             {isLastCommit
-              ? "브랜치에서 계속 작업하기"
-              : "새 브랜치로 이어서 작업하기"}
+              ? "이 버전에서 계속 작업하기"
+              : "새 버전으로 이어서 작업하기"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="branchName">브랜치 이름 *</Label>
+            <Label htmlFor="branchName">버전 이름 *</Label>
             <Input
               id="branchName"
               value={branchName}
               onChange={(e) => setBranchName(e.target.value)}
-              placeholder="브랜치 이름을 입력하세요"
+              placeholder="버전 이름을 입력하세요"
               required
               disabled={isLoading || isLastCommit}
               autoFocus
             />
             {isLastCommit && (
               <p className="text-sm text-gray-500">
-                현재 브랜치의 마지막 커밋이므로 기존 브랜치에서 계속 작업합니다.
+                현재 버전의 마지막 기록이므로 기존 버전에서 계속 작업합니다.
               </p>
             )}
           </div>

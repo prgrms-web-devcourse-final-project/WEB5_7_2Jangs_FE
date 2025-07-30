@@ -186,8 +186,8 @@ export default function DocumentDetailPage() {
 
       window.location.reload()
     } catch (error) {
-      console.error("브랜치 생성 중 오류:", error)
-      alertDialog("브랜치 생성 중 오류가 발생했습니다.", "오류", "destructive")
+      console.error("버전 생성 중 오류:", error)
+      alertDialog("버전 생성 중 오류가 발생했습니다.", "오류", "destructive")
     }
   }
 
@@ -207,10 +207,10 @@ export default function DocumentDetailPage() {
       window.location.reload()
     },
     onError: async (error: any) => {
-      console.error("브랜치 삭제 중 오류:", error)
+      console.error("버전 삭제 중 오류:", error)
 
       // 서버에서 내려온 에러 메시지 추출
-      let errorMessage = "브랜치 삭제 중 오류가 발생했습니다."
+      let errorMessage = "버전 삭제 중 오류가 발생했습니다."
 
       try {
         // OpenAPI Generator의 ResponseError 구조에 맞게 파싱
@@ -302,8 +302,8 @@ export default function DocumentDetailPage() {
 
     // 확인 다이얼로그 표시
     const confirmed = await confirm(
-      "이 커밋을 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.\n\n참고: 각 브랜치의 최신 커밋만 삭제 가능합니다.",
-      "커밋 삭제",
+      "이 기록을 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.\n\n참고: 각 버전의 최신 기록만 삭제 가능합니다.",
+      "기록 삭제",
     )
 
     if (!confirmed) {
