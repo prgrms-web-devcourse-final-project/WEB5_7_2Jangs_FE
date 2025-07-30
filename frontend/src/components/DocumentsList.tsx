@@ -194,9 +194,9 @@ export default function DocumentsList() {
             {/* 페이지 정보 표시 */}
             <div className="mt-4 text-center text-sm text-gray-600">
               총 {pagination.totalElements}개 문서 중{" "}
-              {pagination.currentPage * 10 + 1}-
+              {pagination.currentPage * 12 + 1}-
               {Math.min(
-                (pagination.currentPage + 1) * 10,
+                (pagination.currentPage + 1) * 12,
                 pagination.totalElements,
               )}
               개 표시
