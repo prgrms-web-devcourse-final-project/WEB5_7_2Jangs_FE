@@ -26,9 +26,9 @@ export default function BranchEditModal({
   // 모달이 열릴 때 기본값 설정
   useEffect(() => {
     if (isOpen) {
-      setBranchName(defaultBranchName)
+      setBranchName(isLastCommit ? defaultBranchName : "")
     }
-  }, [isOpen, defaultBranchName])
+  }, [isOpen, defaultBranchName, isLastCommit])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
