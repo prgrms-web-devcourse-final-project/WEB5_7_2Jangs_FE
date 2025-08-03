@@ -7,7 +7,7 @@ import { useDocumentContent } from "@/hooks/useDocumentContent"
 import type { OutputData } from "@editorjs/editorjs"
 import { Button } from "./ui/button"
 import { apiClient } from "@/api/apiClient"
-import { useRef, useState } from "react"
+import { useRef, useState, useMemo, useCallback } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { calculateBlockDiff } from "@/lib/diffUtils"
 
@@ -54,7 +54,7 @@ export default function DocumentContent({
   const navigate = useNavigate()
 
   // API 데이터를 OutputData로 변환하는 함수
-  const convertToEditorData = (data: any): OutputData => {
+  const convertToEditorData = useCallback((data: any): OutputData => {
     if (!data) return EditData
 
     // 이미 OutputData 형태라면 그대로 반환
@@ -72,7 +72,18 @@ export default function DocumentContent({
     }
 
     return EditData
-  }
+  }, [])
+
+  // 에디터 데이터를 메모이제이션하여 불필요한 재렌더링 방지
+  const originalEditorData = useMemo(
+    () => convertToEditorData(originalData),
+    [originalData, convertToEditorData],
+  )
+
+  const modifiedEditorData = useMemo(
+    () => convertToEditorData(modifiedData),
+    [modifiedData, convertToEditorData],
+  )
 
   // 데이터 변경 핸들러 (편집 모드에서 사용)
   const onDataChange = (newData: OutputData) => {
@@ -300,8 +311,9 @@ export default function DocumentContent({
             <DocumentEditor
               ref={editorRef}
               isEditable={true}
-              initialData={convertToEditorData(originalData)}
+              initialData={originalEditorData}
               onDataChange={onDataChange}
+              disableAutoUpdate={true}
             />
             <div className="flex justify-end gap-10 mt-4 p-4 border-t">
               <Button
@@ -327,15 +339,16 @@ export default function DocumentContent({
         return (
           <DocumentEditor
             isEditable={false}
-            initialData={convertToEditorData(originalData)}
+            initialData={originalEditorData}
             onDataChange={onDataChange}
+            disableAutoUpdate={true}
           />
         )
       case "compare":
         return (
           <DocumentCompareView
-            originalData={convertToEditorData(originalData) || EditData}
-            modifiedData={convertToEditorData(modifiedData) || EditData}
+            originalData={originalEditorData || EditData}
+            modifiedData={modifiedEditorData || EditData}
           />
         )
       default:
